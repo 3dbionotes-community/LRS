@@ -34,7 +34,7 @@ services:
     build: nginx
     restart: always
     ports:
-      - "${APP_EXT_PORT}::8000"
+      - "${APP_EXT_PORT}:8000"
     volumes:
       - ./nginx/:/etc/nginx/conf.d/:ro
     depends_on:
