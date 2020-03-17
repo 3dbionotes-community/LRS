@@ -11,6 +11,8 @@ services:
         USER_PASSWD: ${USER_PASSWD}
         USER_UID: ${USER_UID}
         USER_GID: ${USER_UID}
+    volumes:
+      - ./app:/home/${USER_NAME}/lrs/app
     user: ${USER_NAME}
     entrypoint: python manage.py runserver 0.0.0.0:8000
 
