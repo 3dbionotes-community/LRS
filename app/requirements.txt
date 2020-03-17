@@ -1,0 +1,6 @@
+Django==2.2.11
+PyMySQL
+django_mysql==3.3.0
+mysqlclient==1.4.6
+requests==2.23.0
+# uWSGI
