@@ -39,6 +39,7 @@ services:
       - "${APP_EXT_PORT}:8000"
     volumes:
       - ./nginx/:/etc/nginx/conf.d/:ro
+      - ./app/static:/static
     depends_on:
       - ws
 
