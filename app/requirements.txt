@@ -1,4 +1,7 @@
 Django==2.2.11
+djangorestframework
+django-cors-headers
+python-dotenv
 PyMySQL==0.9.3
 django_mysql==3.3.0
 requests==2.23.0
