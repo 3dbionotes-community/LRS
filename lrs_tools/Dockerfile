@@ -8,6 +8,10 @@ RUN apt-get update \
     openssh-server supervisor tmux \
     sudo nano git curl bzip2 ca-certificates \
     python3-dev \
+    gcc-8 g++-8 cmake openjdk-11-jdk \
+    libxft-dev libssl-dev libxext-dev libxml2-dev \
+    libreadline-dev libquadmath0 libxslt1-dev libopenmpi-dev openmpi-bin  libxss-dev libgsl0-dev libx11-dev \
+    gfortran libfreetype6-dev scons libfftw3-dev libopencv-dev \
     2>&1 \
     && apt-get autoremove -y \
     && apt-get clean -y \
