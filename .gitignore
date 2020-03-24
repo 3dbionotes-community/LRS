@@ -3,6 +3,7 @@
 
 .env
 certs/
+service/
 
 # Python
 __pycache__/
