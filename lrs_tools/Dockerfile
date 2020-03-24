@@ -43,6 +43,18 @@ RUN mkdir -p /home/${USER_NAME}/lrs/tools
 RUN mkdir -p /home/${USER_NAME}/lrs/data
 WORKDIR /home/${USER_NAME}/lrs/tools
 
+# Install Scipion-2
+RUN curl -o scipion_v2.0_2019-04-23_linux64_Ubuntu.tgz http://scipion.i2pc.es/startdownload/?bundleId=3
+RUN tar xfv scipion_v2.0_2019-04-23_linux64_Ubuntu.tgz
+WORKDIR /home/${USER_NAME}/lrs/tools/scipion/pyworkflow/templates
+RUN sed -i "s@SCIPION_NOTIFY = False@SCIPION_NOTIFY = True@g" scipion.template 
+RUN sed -e "s@/usr/lib64/mpi/gcc/openmpi/lib@/usr/lib/x86_64-linux-gnu/openmpi/lib@" scipion.template
+RUN sed -e "s@/usr/lib64/mpi/gcc/openmpi/include@/usr/lib/x86_64-linux-gnu/openmpi/include@" scipion.template
+WORKDIR /home/${USER_NAME}/lrs/tools/scipion
+RUN ./scipion config
+WORKDIR /home/${USER_NAME}/lrs/tools/scipion
+RUN ./scipion install -j 5
+
 # Setup supervisor
 USER root
 COPY init.conf /etc/supervisor/conf.d/init.conf
