@@ -43,7 +43,7 @@ RUN mkdir -p /home/${USER_NAME}/lrs/tools
 RUN mkdir -p /home/${USER_NAME}/lrs/data
 WORKDIR /home/${USER_NAME}/lrs/tools
 
-# Install Scipion-2
+# Install Scipion-2 ------------------------------------------------
 RUN curl -o scipion_v2.0_2019-04-23_linux64_Ubuntu.tgz http://scipion.i2pc.es/startdownload/?bundleId=3
 RUN tar xfv scipion_v2.0_2019-04-23_linux64_Ubuntu.tgz
 WORKDIR /home/${USER_NAME}/lrs/tools/scipion/pyworkflow/templates
@@ -54,6 +54,17 @@ WORKDIR /home/${USER_NAME}/lrs/tools/scipion
 RUN ./scipion config
 WORKDIR /home/${USER_NAME}/lrs/tools/scipion
 RUN ./scipion install -j 5
+ENV SCIPION_HOME=/home/${USER_NAME}/lrs/tools/scipion
+
+# Install XMIPP ---------------------------------------------------
+WORKDIR /home/${USER_NAME}/lrs/tools
+RUN git clone https://github.com/I2PC/xmipp xmipp-bundle
+WORKDIR /home/${USER_NAME}/lrs/tools/xmipp-bundle
+RUN sed -i "s@mpirun -np 4@mpirun -np 2@g" xmipp
+RUN ./xmipp config
+RUN sed -i "s@OPENCV=True@OPENCV=False@g" xmipp.conf
+RUN /home/${USER_NAME}/lrs/tools/scipion/scipion run ./xmipp
+
 
 # Setup supervisor
 USER root
