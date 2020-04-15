@@ -5,33 +5,17 @@ services:
   ws:
     image: bcu/lrs_ws
     build:
-      context: ./app
+      context: .
       args:
         USER_NAME: ${USER_NAME}
         USER_PASSWD: ${USER_PASSWD}
         USER_UID: ${USER_UID}
         USER_GID: ${USER_UID}
-    env_file:
-      ./app/.env
     volumes:
-      - ./app:/home/${USER_NAME}/lrs/app
+      - .:/home/${USER_NAME}/lrs/app
+      - ./service/data:/home/${USER_NAME}/lrs/data
     user: ${USER_NAME}
     entrypoint: python manage.py runserver 0.0.0.0:8000
-    depends_on:
-      - db
-
-  # MySQL BBDD
-  db:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - mysql_data:/var/lib/mysql
 
 # NGINX proxy
   proxy:
@@ -42,9 +26,6 @@ services:
       - "${APP_EXT_PORT}:8000"
     volumes:
       - ./nginx/:/etc/nginx/conf.d/:ro
-      - ./app/static:/static
+      - ./static:/static
     depends_on:
       - ws
-
-volumes:
-  mysql_data:
