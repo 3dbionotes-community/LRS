@@ -8,5 +8,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api/', include('rest_framework.urls', namespace='rest_framework')),
     # Volume maps
-    path('maps/', views.VolmapList.as_view(), name='volmap-list'),
+    path('lrs/', views.EntryList.as_view(), name='entry-list'),
 ]
