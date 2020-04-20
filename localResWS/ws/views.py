@@ -107,27 +107,33 @@ def getEntryDatafiles(entryId):
     except:
         raise Exception
 
-class EntryDetail(APIView):
+class EntryDetailView(APIView):
     """
-    Retrieve, update or delete an annotation entry.
+    Retrieve an annotation entry `details`.
     """
     def get(self, request, query_id, format=None):
         """
-        Retrieve an annotation entry.
+        Get `details` for an annotation entry.
         """
         # get from DB
         try:
             entry = models.Entry.objects.get(entryId__iexact=query_id)
-            logger.debug("Found %s in DB", query_id)
-            serializer = serializers.EntrySerializer(entry)
-            return Response(serializer.data)
+            if entry:
+                logger.debug("Found %s in DB", query_id)
+                serializer = serializers.EntrySerializer(entry)
+                return Response(serializer.data)
+            else:
+                return HttpResponseNotFound()
         except (ValueError, ValidationError, models.Entry.DoesNotExist) as exc:
             # check from disk
             try:
                 entry = getEntryFiles(query_id)
-                logger.debug("Found %s in Disk", query_id)
-                serializer = serializers.EntrySerializer(entry)
-                return Response(serializer.data)
+                if entry:
+                    logger.debug("Found %s in Disk", query_id)
+                    serializer = serializers.EntrySerializer(entry)
+                    return Response(serializer.data)
+                else:
+                    return HttpResponseNotFound()
             except:
                 return HttpResponseNotFound()
 

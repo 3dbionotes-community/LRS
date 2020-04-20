@@ -13,6 +13,6 @@ router.register(r'files', views.DataFileViewSet)
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
     
-    path('lrs/<slug:query_id>/', views.EntryDetail.as_view()),
+    path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
     path('', include(router.urls)),
 ]
