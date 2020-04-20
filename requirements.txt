@@ -2,10 +2,4 @@ Django
 djangorestframework
 django-cors-headers
 python-dotenv
-PyMySQL
-mysqlclient
-django_mysql
 requests
-numpy
-biopython
-#uWSGI
