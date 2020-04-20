@@ -152,6 +152,9 @@ LOGGING = {
         },
     },
     'loggers': {
+        'django.utils.autoreload': {
+          'level': 'INFO',
+        },
         'django': {
             'handlers': ['file'],
             'level': 'DEBUG',
@@ -162,10 +165,13 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        
     },
 }
 
 REST_FRAMEWORK = {
     'DEFAULT_VERSION': '0.1.0',
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning'
+    # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }

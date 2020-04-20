@@ -1,34 +1,31 @@
-from django.db import models
 import uuid
 
-ANNOT_CATEGORIES = (('mr', 'MAP_RESOLUTION'),)
-ANNOT_TYPES = (('lr', 'LOCAL_RESOLUTION'), ('bf', 'B_FACTOR'), ('mq', 'MAP_Q'))
+from django.db import models
 
+
+class AnnCategory(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=100, blank=True, default='')
+    description = models.TextField()
+
+    class Meta:
+        ordering = ['created']
+
+class AnnType(models.Model):
+    category = models.ForeignKey(AnnCategory, related_name='types', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=100, blank=True, default='')
+    description = models.TextField()
 
 class Entry(models.Model):
-    unique_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=50, blank=True, default='')
-    description = models.CharField(max_length=255, blank=True, default='')
-    local_path = models.CharField(max_length=255, blank=True, default='')
-    volmaps = []
-    pdbmodels = []
-
-class Volmap(models.Model):
-
-    unique_id = models.UUIDField(primary_key=True, default=uuid.uuid4,
-                                 editable=False)
-    title = models.CharField(max_length=50, blank=True, default='')
-    ori_path = models.CharField(max_length=255, blank=True, default='')
-    local_path = models.CharField(max_length=255, blank=True, default='')
     created = models.DateTimeField(auto_now_add=True)
+    entryId = models.CharField(max_length=10, blank=True, default='')
+    path = models.CharField(max_length=255, blank=True, default='')
 
-    def __str__(self):
-        return self.title + ", [" + str(self.unique_id) + "]" 
+class DataFile(models.Model):
+    # entryId = models.ForeignKey(Entry, related_name='data_files', on_delete=models.CASCADE)
+    # anntype = models.ForeignKey(AnnCategory, related_name='data_files', on_delete=models.CASCADE)
 
-class EMResolutionMap(Volmap):
-
-    # "category": "MAP_RESOLUTION"
-    annotation_category = models.CharField(choices=ANNOT_CATEGORIES, blank=False, default='MAP_RESOLUTION', max_length=50)
-    annotation_type = models.CharField(choices=ANNOT_TYPES, blank=False, default='LOCAL_RESOLUTION', max_length=50)
-    map_gzfile = models.FileField(blank=True)
-    
+    unique_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    path = models.CharField(max_length=255, blank=True, default='')
+    # data_file = models.FileField(blank=True, default='')

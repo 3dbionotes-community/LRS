@@ -1,12 +1,18 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from localResWS.ws import views
 
+# Create a router and register our viewsets with it.
 router = DefaultRouter()
+router.register(r'categories', views.CategoryViewSet)
+router.register(r'types', views.TypeViewSet)
+router.register(r'lrs', views.EntryViewSet)
+router.register(r'files', views.DataFileViewSet)
 
+# The API URLs are now determined automatically by the router.
 urlpatterns = [
+    
+    path('lrs/<slug:query_id>/', views.EntryDetail.as_view()),
     path('', include(router.urls)),
-    path('api/', include('rest_framework.urls', namespace='rest_framework')),
-    # Volume maps
-    path('lrs/', views.EntryList.as_view(), name='entry-list'),
 ]
