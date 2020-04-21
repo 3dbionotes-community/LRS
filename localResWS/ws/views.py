@@ -28,13 +28,6 @@ REGEX_LR_FILE = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
 REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
 
 
-@api_view(['GET'])
-def api_root(request, format=None):
-    return Response({
-        'categories': reverse('category-list', request=request, format=format),
-        'types': reverse('type-list', request=request, format=format)
-    })
-
 class CategoryViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
