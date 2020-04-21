@@ -22,9 +22,11 @@ from localResWS.ws import models
 from localResWS.ws import serializers
 
 LOCAL_DATA_DIR = os.path.join(settings.BASE_DIR, 'service/data')
-VOLMAP_FILENAME = 'local_resol.vol'
+VOLMAP_REG_EXP = '^local_resol\.vol$'
+PDB_REG_EXP = '^pdb\d\w{3}\.ent$'
+LR_REG_EXP = '^pdb\d\w{3}_LR_\w+\.pdb$'
+MAPQ_REG_EXP = '^pdb\d\w{3}_mapQ_\w+\.pdb$'
 logger = logging.getLogger(__name__)
-
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -78,34 +80,23 @@ def getEntryDatafiles(entryId):
     re_pdb_file = re.compile('^pdb\d\w{3}\.ent$')
     re_LR_file = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
     re_mapQ_file = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
-    
+    reg_expressions = [re_vol_file, re_pdb_file, re_LR_file, re_mapQ_file]
     try:
         dir_list = os.listdir(path)
         # new entry
-        logger.debug('Creating new entry: %s', entryId)
+        logger.debug('Creating new entry: %s from %s', entryId, path)
         entry = models.Entry(entryId=entryId, path=path)
-        
-        for filename in dir_list:
-            if re_vol_file.match(path):
-                logger.debug('Found volume file %s', filename)
-                data_files.append(filename)
-
-            if re_pdb_file.match(path):
-                logger.debug('Found pdb file %s', filename)
-                data_files.append(filename)
-
-            if re_LR_file.match(path):
-                logger.debug('Found LR file %s', filename)
-                data_files.append(filename)
-
-            if re_mapQ_file.match(path):
-                logger.debug('Found mapQ file %s', filename)
-                data_files.append(filename)
-        entry.data_files = data_files
         entry.save()
+        for filename in dir_list:
+            for reg_exp in reg_expressions:
+                if reg_exp.match(filename):
+                    logger.debug('Found data file %s', filename)
+                    logger.debug('Creating new dataFile %s record', filename)
+                    data_file = models.DataFile(filename=filename, path=path, entry=entry)
+                    data_file.save()
         return entry
-    except:
-        raise Exception
+    except() as exc:
+        logger.exception(exc)
 
 class EntryDetailView(APIView):
     """
@@ -123,8 +114,10 @@ class EntryDetailView(APIView):
                 serializer = serializers.EntrySerializer(entry)
                 return Response(serializer.data)
             else:
+                logger.debug("Not found %s in DB", query_id)
                 return HttpResponseNotFound()
         except (ValueError, ValidationError, models.Entry.DoesNotExist) as exc:
+            logger.exception(exc)
             # check from disk
             try:
                 entry = getEntryFiles(query_id)
@@ -133,8 +126,10 @@ class EntryDetailView(APIView):
                     serializer = serializers.EntrySerializer(entry)
                     return Response(serializer.data)
                 else:
+                    logger.debug("Not found %s in Disk", query_id)
                     return HttpResponseNotFound()
             except:
+                logger.exception(exc)
                 return HttpResponseNotFound()
 
 

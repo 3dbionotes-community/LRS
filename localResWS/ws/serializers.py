@@ -29,15 +29,19 @@ class TypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'created', 'category']
 
 
+class DataFileNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.DataFile
+        fields = ['filename', 'unique_id']
 
 class EntrySerializer(serializers.ModelSerializer):
+    files = DataFileNestedSerializer(many=True, read_only=True)
+
     class Meta:
         model = models.Entry
-        fields = ['id', 'entryId', 'path', 'created']
+        fields = ['entryId', 'path', 'files']
 
 class DataFileSerializer(serializers.ModelSerializer):
-    entryId = EntrySerializer()
-
     class Meta:
-        model = models.Entry
-        fields = '__all__'
+        model = models.DataFile
+        fields = ['unique_id', 'filename', 'entry', 'path']
