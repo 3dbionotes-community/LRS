@@ -27,3 +27,14 @@ class DataFile(models.Model):
     filename = models.CharField(max_length=50, blank=True, default='')
     path = models.CharField(max_length=255, blank=True, default='')
     entry = models.ForeignKey(Entry, related_name='files', on_delete=models.CASCADE)
+
+class Feature(models.Model):
+    start = models.IntegerField()
+    end = models.IntegerField()
+    f_type = models.IntegerField()
+    f_category = models.IntegerField()
+    description = models.CharField(max_length=255, blank=True, default='')
+
+class DataSet(models.Model):
+    file = models.ForeignKey(Entry, related_name='data', on_delete=models.CASCADE)
+    features = Feature()

@@ -41,7 +41,21 @@ class EntrySerializer(serializers.ModelSerializer):
         model = models.Entry
         fields = ['entryId', 'path', 'files']
 
+class DataSetNestedSerializer(serializers.ModelSerializer):
+    features = serializers.ListField(child=serializers.CharField())
+    class Meta:
+        model = models.DataSet
+        fields = ['features',]
+
 class DataFileSerializer(serializers.ModelSerializer):
+    data = DataFileNestedSerializer(many=True, read_only=True)
     class Meta:
         model = models.DataFile
-        fields = ['unique_id', 'filename', 'entry', 'path']
+        fields = ['unique_id', 'filename', 'entry', 'path', 'data']
+
+
+class DataSetSerializer(serializers.ModelSerializer):
+    features = serializers.ListField(child=serializers.CharField())
+    class Meta:
+        model = models.DataSet
+        fields = ['file', 'features']
