@@ -18,12 +18,15 @@ from rest_framework.views import APIView
 
 from localResWS.ws import models, serializers
 
-LOCAL_DATA_DIR = os.path.join(settings.BASE_DIR, 'service/data')
-VOLMAP_REG_EXP = '^local_resol\.vol$'
-PDB_REG_EXP = '^pdb\d\w{3}\.ent$'
-LR_REG_EXP = '^pdb\d\w{3}_LR_\w+\.pdb$'
-MAPQ_REG_EXP = '^pdb\d\w{3}_mapQ_\w+\.pdb$'
+
 logger = logging.getLogger(__name__)
+LOCAL_DATA_DIR = os.path.join(settings.BASE_DIR, 'service/data')
+REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
+REGEX_VOL_FILE = re.compile('^local_resol\.vol$')
+REGEX_PDB_FILE = re.compile('^pdb\d\w{3}\.ent$')
+REGEX_LR_FILE = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
+REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
+
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -90,15 +93,43 @@ def bad_entry_request(query_id):
                 "detail": "entryId _strictly_ must be in the form `emd-#####`" }
     return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
+def update_DB_from_Disk():
+    logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
+    path = os.path.join(LOCAL_DATA_DIR)
+    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
+    entry_list = []
+    try:
+        dir_names = [ f.name for f in os.scandir(LOCAL_DATA_DIR) if f.is_dir() and REGEX_EMDB_ID.match(f.name) ]
+        for dir_name in dir_names:
+            # check if entry already exists
+            try:
+                models.Entry.objects.get(entryId__iexact=dir_name)
+            except (models.Entry.DoesNotExist) as exc:
+                # logger.exception(exc)
+                # new entry
+                logger.debug('Creating new entry: %s from %s', dir_name, path)
+                entry = models.Entry(entryId=dir_name, path=path)
+                entry.save()
+                # find files inside
+                logger.debug('Searching for datafiles: %s ', dir_name)
+                dir_list = os.listdir(os.path.join(path, dir_name))
+                for filename in dir_list:
+                    for reg_exp in reg_expressions:
+                        if reg_exp.match(filename):
+                            logger.debug('Found data file %s', filename)
+                            logger.debug('Creating new dataFile %s record', filename)
+                            data_file = models.DataFile(filename=filename, path=path, entry=entry)
+                            data_file.save()
+                entry_list.append(entry)
+        return entry_list
+    except() as exc:
+        logger.exception(exc)
+    return
+
 def getEntryFiles(entryId):
     logger.debug("Get entry files for %s", entryId)
     path = os.path.join(LOCAL_DATA_DIR, entryId)
-    data_files = []
-    re_vol_file = re.compile('^local_resol\.vol$')
-    re_pdb_file = re.compile('^pdb\d\w{3}\.ent$')
-    re_LR_file = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
-    re_mapQ_file = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
-    reg_expressions = [re_vol_file, re_pdb_file, re_LR_file, re_mapQ_file]
+    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
     try:
         dir_list = os.listdir(path)
         # new entry
@@ -153,6 +184,14 @@ class EntryDetailView(APIView):
 
 
 class EntryListUpdateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, query_id, format=None):
-        pass
+    # def post(self, request, format=None):
+    def get(self, request, format=None):
+        logger.debug("Updating DB from data folder: %s", LOCAL_DATA_DIR)
+        entry_list = update_DB_from_Disk()
+        if entry_list:
+            logger.debug("...got some new entries: %d", len(entry_list))
+            return Response({ "request": "DB update","detail": "Got some new entries: "+str(len(entry_list))}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"request": "DB update","detail":"No new entries found."}, status=status.HTTP_204_NO_CONTENT)
