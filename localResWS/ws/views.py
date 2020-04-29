@@ -243,8 +243,8 @@ class PdbEntryLocResView(APIView):
                       jsonLocRes= self._getJsonFromFname( os.path.join(os.path.join(LOCAL_DATA_DIR, dirName, fname)), chain_id)
                       break
         if jsonLocRes is None:
-          logger.debug("Not found %s in file system", pdb_id)
-          return not_found_resp(query_id)
+          logger.debug("Not found %s in file system", pdb_id+"/"+chain_id)
+          return not_found_resp(pdb_id)
         return Response(jsonLocRes)
 
 class EntryListUpdateView(APIView):
