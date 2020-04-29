@@ -27,7 +27,7 @@ REGEX_VOL_FILE = re.compile('^local_resol\.vol$')
 REGEX_PDB_FILE = re.compile('^pdb\d\w{3}\.ent$')
 REGEX_LR_FILE = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
 REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
-
+DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -188,6 +188,61 @@ class PdbEntryFakeView(APIView):
         import random
         fakeJson=[ {"chain":chain_id, "data": [ {"begin":str(i), "value":2+5*random.random()} for i in range(1,250) ] }]
         return Response(fakeJson)
+
+
+class PdbEntryLocResView(APIView):
+    """
+    Retrieve an annotation entry `details`.
+    """
+
+    def _getJsonFromFname(self, fneme, chain_id):
+      #TODO: Implement actual code
+      residues=[]
+      with open(fneme) as f:
+        for line in f:
+          if not "CA" in line or not "ATOM" in line: continue
+          chainId= line[21]
+          if chainId!=chain_id: continue
+          resId= line[22:26].strip()
+          bFactor= line[55:60].strip()
+          residues.append( {"begin":resId, "value":bFactor}
+      return {"chain":chain_id, "data":residues}
+
+    def get(self, request, pdb_id, chain_id, format=None):
+        """
+        Get fake data json for pdb_id, chain_id
+        """
+        if not re.search(REGEX_PDB_ID, pdb_id):
+            logger.debug("Bad Request Entry ID: %s", query_id)
+            content = { "request":pdb_id, 
+                        "detail": "entryId _strictly_ must be in the form `####/#`" }
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
+        jsonLocRes=None
+        # get from DB
+        try:
+            logger.debug("Searching %s in DB", pdb_id)
+            fileRecord = models.DataFile.objects.get(filename__iexact= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id} )
+            if fileRecord:
+                jsonLocRes= self._getJsonFromFname( os.path.join(fileRecord.path, fileRecord.filename), chain_id )
+            else:
+                logger.debug("Not found %s in DB", pdb_id)
+                return not_found_resp(query_id)
+        except (ValueError, ValidationError, models.Entry.DoesNotExist) as exc:
+            logger.exception(exc)
+            # check from disk
+            logger.debug("Searching %s in Disk", query_id)
+            targetFname= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
+            for dirName in os.listdir(LOCAL_DATA_DIR):
+              for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName):
+                  if fname== targetFname:
+                      jsonLocRes= self._getJsonFromFname( os.listdir(os.path.join(LOCAL_DATA_DIR, dirName, fname), chain_id)
+                      break
+        if jsonLocRes is None:
+          logger.debug("Not found %s in file system", pdb_id)
+          return not_found_resp(query_id)
+        return Response(jsonLocRes)
 
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
