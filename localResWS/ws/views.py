@@ -212,6 +212,7 @@ class PdbEntryLocResView(APIView):
         """
         Get fake data json for pdb_id, chain_id
         """
+        pdb_id= pdb_id.lower()
         if not re.search(REGEX_PDB_ID, pdb_id):
             logger.debug("Bad Request Entry ID: %s", query_id)
             content = { "request":pdb_id, 
