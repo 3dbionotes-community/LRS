@@ -187,7 +187,7 @@ class PdbEntryFakeView(APIView):
         """
         import random
         fakeJson=[ {"chain":chain_id, "data": [ {"begin":str(i), "value":2+5*random.random()} for i in range(1,250) ] }]
-        return return Response(fakeJson)
+        return Response(fakeJson)
 
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
