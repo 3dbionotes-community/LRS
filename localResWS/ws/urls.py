@@ -15,7 +15,6 @@ router.register(r'datasets', views.DataSetViewSet)
 urlpatterns = [
     path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
     path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
-    path('lrs/fakeLR/<slug:pdb_id>_<slug:chain_id>/', views.PdbEntryFakeView.as_view()),
-    re_path(r'^lrs/fakeLR/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$'
+    re_path(r'^lrs/fakeLR/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
     path('', include(router.urls)),
 ]
