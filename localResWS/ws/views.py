@@ -186,7 +186,7 @@ class PdbEntryFakeView(APIView):
         Get fake data json for pdb_id, chain_id
         """
         import random
-        fakeJson={ "chain":chain_id: [ 2+5*random.rand()for i in range(1,250) ] }
+        fakeJson=[ {"chain":chain_id, "data": [ {"begin":str(i), "value":2+5*random.random()} for i in range(1,250) ] }]
         return return Response(fakeJson)
 
 class EntryListUpdateView(APIView):
