@@ -206,6 +206,8 @@ class PdbEntryLocResView(APIView):
           resId= line[22:26].strip()
           bFactor= line[55:60].strip()
           residues.append( {"begin":resId, "value":bFactor} )
+      if len(residues)==0:
+        return None
       return {"chain":chain_id, "data":residues}
 
     def get(self, request, pdb_id, chain_id, format=None):
@@ -230,7 +232,7 @@ class PdbEntryLocResView(APIView):
             else:
                 logger.debug("Not found %s in DB", pdb_id)
                 return not_found_resp(query_id)
-        except (ValueError, ValidationError, models.Entry.DoesNotExist) as exc:
+        except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             logger.exception(exc)
             # check from disk
             logger.debug("Searching %s in Disk", query_id)
