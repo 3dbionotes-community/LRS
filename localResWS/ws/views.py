@@ -205,7 +205,7 @@ class PdbEntryLocResView(APIView):
           if chainId!=chain_id: continue
           resId= line[22:26].strip()
           bFactor= line[55:60].strip()
-          residues.append( {"begin":resId, "value":bFactor}
+          residues.append( {"begin":resId, "value":bFactor} )
       return {"chain":chain_id, "data":residues}
 
     def get(self, request, pdb_id, chain_id, format=None):
