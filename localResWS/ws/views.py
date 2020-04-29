@@ -237,7 +237,7 @@ class PdbEntryLocResView(APIView):
             for dirName in os.listdir(LOCAL_DATA_DIR):
               for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
                   if fname== targetFname:
-                      jsonLocRes= self._getJsonFromFname( os.listdir(os.path.join(LOCAL_DATA_DIR, dirName, fname), chain_id)
+                      jsonLocRes= self._getJsonFromFname( os.listdir(os.path.join(LOCAL_DATA_DIR, dirName, fname)), chain_id)
                       break
         if jsonLocRes is None:
           logger.debug("Not found %s in file system", pdb_id)
