@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
 from localResWS.ws import views
@@ -15,5 +15,7 @@ router.register(r'datasets', views.DataSetViewSet)
 urlpatterns = [
     path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
     path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
+    path('lrs/fakeLR/<slug:pdb_id>_<slug:chain_id>/', views.PdbEntryFakeView.as_view()),
+    re_path(r'^lrs/fakeLR/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$'
     path('', include(router.urls)),
 ]

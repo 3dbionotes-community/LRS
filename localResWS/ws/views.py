@@ -22,6 +22,7 @@ from localResWS.ws import models, serializers
 logger = logging.getLogger(__name__)
 LOCAL_DATA_DIR = os.path.join(settings.BASE_DIR, 'service/data')
 REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
+REGEX_PDB_ID = re.compile('^\d\w{3}$')
 REGEX_VOL_FILE = re.compile('^local_resol\.vol$')
 REGEX_PDB_FILE = re.compile('^pdb\d\w{3}\.ent$')
 REGEX_LR_FILE = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
@@ -175,6 +176,18 @@ class EntryDetailView(APIView):
                 logger.exception(exc)
                 return not_found_resp(query_id)
 
+
+class PdbEntryFakeView(APIView):
+    """
+    Retrieve an annotation entry `details`.
+    """
+    def get(self, request, pdb_id, chain_id, format=None):
+        """
+        Get fake data json for pdb_id, chain_id
+        """
+        import random
+        fakeJson={ "chain":chain_id: [ 2+5*random.rand()for i in range(1,250) ] }
+        return return Response(fakeJson)
 
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
