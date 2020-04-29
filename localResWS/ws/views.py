@@ -216,7 +216,7 @@ class PdbEntryLocResView(APIView):
         """
         pdb_id= pdb_id.lower()
         if not re.search(REGEX_PDB_ID, pdb_id):
-            logger.debug("Bad Request Entry ID: %s", query_id)
+            logger.debug("Bad Request Entry ID: %s", pdb_id)
             content = { "request":pdb_id, 
                         "detail": "entryId _strictly_ must be in the form `####/#`" }
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
@@ -231,11 +231,11 @@ class PdbEntryLocResView(APIView):
                 jsonLocRes= self._getJsonFromFname( os.path.join(fileRecord.path, fileRecord.filename), chain_id )
             else:
                 logger.debug("Not found %s in DB", pdb_id)
-                return not_found_resp(query_id)
+                return not_found_resp(pdb_id)
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             logger.exception(exc)
             # check from disk
-            logger.debug("Searching %s in Disk", query_id)
+            logger.debug("Searching %s in Disk", pdb_id)
             targetFname= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
             for dirName in os.listdir(LOCAL_DATA_DIR):
               for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
