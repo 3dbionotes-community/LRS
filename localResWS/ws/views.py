@@ -243,7 +243,7 @@ class PdbEntryLocResView(APIView):
       return None
 
 
-class PdbEntryLocAnyAlgorithm(APIView):
+class PdbEntryLocAnyAlgorithm(PdbEntryLocResView):
     """
     Retrieve an annotation entry `details`.
     """
