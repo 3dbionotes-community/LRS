@@ -4,10 +4,10 @@ import re
 from subprocess import check_output
 
 
-from localResWS.ws.dataPaths import THORN_BASEDIR
+from localResWS.ws.dataPaths import THORN_DATA_DIR
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
 
-def findIsolde(dirToLook=THORN_BASEDIR):
+def findIsolde(dirToLook=THORN_DATA_DIR):
   data={}
   cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", "*isolde/*pdb"]
   isoldesCandidates= check_output(cmd ).decode()
@@ -22,7 +22,7 @@ def findIsolde(dirToLook=THORN_BASEDIR):
   return data
 
 
-def findPdbRedo(dirToLook=THORN_BASEDIR):
+def findPdbRedo(dirToLook=THORN_DATA_DIR):
   data={}
   cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", "*pdb-redo/*final.pdb"]
   pdbRedoCandidates= check_output(cmd ).decode()
