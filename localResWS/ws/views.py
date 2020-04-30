@@ -1,36 +1,32 @@
 import logging
 import os
 import re
-import uuid
-from wsgiref.util import FileWrapper
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import (authentication, generics, mixins, permissions,
-                            renderers, status, viewsets)
-from rest_framework.decorators import api_view
-from rest_framework.parsers import JSONParser
+from rest_framework import (permissions,
+                            status, viewsets)
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from localResWS.ws import models, serializers
-
+from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR, THORN_DATA_DIR
+from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
+from localResWS.ws.utils import findIsolde
 
 logger = logging.getLogger(__name__)
-LOCAL_DATA_DIR = os.path.join(settings.BASE_DIR, 'service/data')
 REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
 REGEX_PDB_ID = re.compile('^\d\w{3}$')
-REGEX_VOL_FILE = re.compile('^local_resol\.vol$')
+REGEX_VOL_FILE = re.compile('^emd-\d{4,5}\.map$')
 REGEX_PDB_FILE = re.compile('^pdb\d\w{3}\.ent$')
-REGEX_LR_FILE = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
-REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
+REGEX_LR_FILE = re.compile('^\d\w{3}\.(deepres|monores)\.pdb$')
+REGEX_MAPQ_FILE = re.compile('^\d\w{3}\.mapq\.pdb$')
 
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
-ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}}
+MAPQ_FNAME_TEMPLATE="%(pdb_id)s.mapq.aa.pdb"
+ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}, "modelQuality":{"mapq":MAPQ_FNAME_TEMPLATE}}
+
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -92,20 +88,20 @@ def bad_entry_request(query_id):
 
 def update_DB_from_Disk():
     logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
-    path = os.path.join(LOCAL_DATA_DIR)
     reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
     entry_list = []
+    path = os.path.join(LOCAL_DATA_DIR, EMDB_BASEDIR)
     try:
-        dir_names = [ f.name for f in os.scandir(LOCAL_DATA_DIR) if f.is_dir() and REGEX_EMDB_ID.match(f.name) ]
+        dir_names = [ f.name for f in os.scandir(path) if f.is_dir() and REGEX_EMDB_ID.match(f.name) ]
         for dir_name in dir_names:
             # check if entry already exists
             try:
-                models.Entry.objects.get(entryId__iexact=dir_name)
+                models.Entry.objects.get(entryId__iexact=dir_name, entryType__iexact=ENTRY_TYPES[0])
             except (models.Entry.DoesNotExist) as exc:
                 # logger.exception(exc)
                 # new entry
                 logger.debug('Creating new entry: %s from %s', dir_name, path)
-                entry = models.Entry(entryId=dir_name, path=path)
+                entry = models.Entry(entryId=dir_name, path=path, entryTypet=ENTRY_TYPES[1])
                 entry.save()
                 # find files inside
                 logger.debug('Searching for datafiles: %s ', dir_name)
@@ -115,12 +111,32 @@ def update_DB_from_Disk():
                         if reg_exp.match(filename):
                             logger.debug('Found data file %s', filename)
                             logger.debug('Creating new dataFile %s record', filename)
-                            data_file = models.DataFile(filename=filename, path=path, entry=entry)
+                            data_file = models.DataFile(filename=filename, path=path, entry=entry, fileType=FILE_TYPES[0])
                             data_file.save()
                 entry_list.append(entry)
         return entry_list
     except() as exc:
         logger.exception(exc)
+
+    for pdbId, listOfFnames in findIsolde().items():
+        try:
+            models.Entry.objects.get(entryId__iexact=dir_name, entryType__iexact=ENTRY_TYPES[1])
+        except (models.Entry.DoesNotExist) as exc:
+            # logger.exception(exc)
+            # new entry
+            logger.debug('Creating new isolde entry: %s from %s', pdbId)
+            entry = models.Entry(entryId=dir_name, path=THORN_DATA_DIR, entryTypet=ENTRY_TYPES[1])
+            entry.save()
+            # find files inside
+            for filename in listOfFnames:
+                logger.debug('Creating new dataFile %s record', filename)
+                data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0], entry=entry, fileType=FILE_TYPES[1])
+                data_file.save()
+            entry_list.append(entry)
+    return entry_list
+
+
+
     return
 
 def getEntryFiles(entryId):
@@ -215,7 +231,6 @@ class PdbEntryLocResUtils(object):
     def _findFname(self, pdb_id, target="monores"):
       #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
       target= target.lower()
-      jsonLocRes=None
       if target=="monores":
         targetFname= MONORES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
       elif target=="deepres":
@@ -241,10 +256,10 @@ class PdbEntryLocResUtils(object):
           # check from disk
           logger.debug("Searching %s in Disk", targetFname)
 
-          for dirName in os.listdir(LOCAL_DATA_DIR):
-            for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
+          for dirName in os.listdir(EMDB_DATA_DIR):
+            for fname in os.listdir(os.path.join(EMDB_DATA_DIR, dirName)):
                 if fname== targetFname:
-                    return os.path.join(LOCAL_DATA_DIR, dirName, fname)
+                    return os.path.join(EMDB_DATA_DIR, dirName, fname)
       return None
 
 class PdbEntryLocResAnyAlgorithm(APIView, PdbEntryLocResUtils):

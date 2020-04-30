@@ -1,0 +1,10 @@
+import os
+
+from django.conf import settings
+
+LOCAL_DATA_DIR = os.path.join(settings.BASE_DIR, 'service/data')
+EMDB_BASEDIR='emdbs'
+EMDB_DATA_DIR=  os.path.join(LOCAL_DATA_DIR, EMDB_BASEDIR)
+
+THORN_BASEDIR="coronavirus_structural_task_force/"
+THORN_DATA_DIR=  os.path.join(LOCAL_DATA_DIR, THORN_BASEDIR)

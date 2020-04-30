@@ -15,8 +15,9 @@ router.register(r'datasets', views.DataSetViewSet)
 urlpatterns = [
     path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
     path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
-    re_path(r'^lrs/fakeLR/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
-    re_path(r'^lrs/localResolution/any/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryLocResAnyAlgorithm.as_view()),
-    re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryAllAnnAlgorithm.as_view()),
+    re_path(r'^lrs/fakeLR/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
+    re_path(r'^lrs/localResolution/any/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryLocResAnyAlgorithm.as_view()),
+    re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryAllAnnAlgorithm.as_view()),
+    re_path(r'^lrs/modifiedPdb/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.DownloadModifiedPDB.as_view()), #TODO: implement DownloadModifiedPDB
     path('', include(router.urls)),
 ]
