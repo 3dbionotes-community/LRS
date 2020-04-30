@@ -124,7 +124,7 @@ def update_DB_from_Disk():
         except (models.Entry.DoesNotExist) as exc:
             # logger.exception(exc)
             # new entry
-            logger.debug('Creating new isolde entry: %s from %s', pdbId)
+            logger.debug('Creating new isolde entry: %s', pdbId)
             entry = models.Entry(entryId=pdbId, path=THORN_DATA_DIR, entryType=ENTRY_TYPES[1])
             entry.save()
             # find files inside
