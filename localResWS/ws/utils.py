@@ -3,13 +3,14 @@ import re
 
 from subprocess import check_output
 
-
 from localResWS.ws.dataPaths import THORN_DATA_DIR
+
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
 
 def findIsolde(dirToLook=THORN_DATA_DIR):
   data={}
   cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", "*isolde/*pdb"]
+  print(" ".join(cmd))
   isoldesCandidates= check_output(cmd ).decode()
   for candidate in isoldesCandidates.split("\n"):
     matchObj= re.match(PDB_FOLDER_PATTERN, candidate)
