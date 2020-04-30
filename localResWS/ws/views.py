@@ -229,17 +229,17 @@ class PdbEntryLocResUtils(object):
 
     def _locateFname(self, targetFname):
       try:
-          logger.debug("Searching %s in DB", pdb_id)
+          logger.debug("Searching %s in DB", targetFname)
           fileRecord = models.DataFile.objects.get(filename__iexact= targetFname )
           if fileRecord:
             return os.path.join(fileRecord.path, fileRecord.filename)
           else:
-              logger.debug("Not found %s in DB", pdb_id)
+              logger.debug("Not found %s in DB", targetFname)
               return None
       except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
           logger.exception(exc)
           # check from disk
-          logger.debug("Searching %s in Disk", pdb_id)
+          logger.debug("Searching %s in Disk", targetFname)
 
           for dirName in os.listdir(LOCAL_DATA_DIR):
             for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
