@@ -198,7 +198,6 @@ class PdbEntryLocResView(APIView):
     """
 
     def _getJsonFromFname(self, fneme, chain_id):
-      #TODO: Implement actual code
       residues=[]
       with open(fneme) as f:
         for line in f:
@@ -243,6 +242,12 @@ class PdbEntryLocResView(APIView):
 
       return None
 
+
+class PdbEntryLocAnyAlgorithm(APIView):
+    """
+    Retrieve an annotation entry `details`.
+    """
+
     def get(self, request, pdb_id, chain_id, format=None):
         """
         Get fake data json for pdb_id, chain_id
@@ -272,6 +277,7 @@ class PdbEntryLocResView(APIView):
           logger.debug("Not found %s in file system", pdb_id+"/"+chain_id)
           return not_found_resp(pdb_id)
         return Response(jsonLocRes)
+
 
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]

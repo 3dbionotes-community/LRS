@@ -16,6 +16,7 @@ urlpatterns = [
     path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
     path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
     re_path(r'^lrs/fakeLR/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
-    re_path(r'^lrs/localResolution/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryLocResView.as_view()),
+#    re_path(r'^lrs/localResolution/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryLocResView.as_view()),
+    re_path(r'^lrs/localResolution/any/(?P<pdb_id>\w{4})/(?P<chain_id>\w{1})/$', views.PdbEntryLocAnyAlgorithm.as_view()),
     path('', include(router.urls)),
 ]
