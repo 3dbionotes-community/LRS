@@ -210,7 +210,7 @@ class PdbEntryLocResUtils(object):
           values.append(bFactor)
       if len(residues)==0:
         return None
-      return {"chain":chain_id, "data":residues, "minVal": min(values), "maxVal": max(values) }
+      return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > 1.5]), "maxVal": max(values) }
 
     def _findFname(self, pdb_id, target="monores"):
       #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
