@@ -4,9 +4,7 @@ import re
 from subprocess import check_output
 
 
-# from localResWS.ws.dataPaths import THORN_BASEDIR
-
-THORN_BASEDIR="kk"
+from localResWS.ws.dataPaths import THORN_BASEDIR
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
 
 def findIsolde(dirToLook=THORN_BASEDIR):
