@@ -17,6 +17,6 @@ urlpatterns = [
     path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
     re_path(r'^lrs/fakeLR/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
     re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryAllAnnAlgorithm.as_view()),
-    re_path(r'^lrs/modifiedPdb/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.DownloadModifiedPDB.as_view()), #TODO: implement DownloadModifiedPDB
+    re_path(r'^files/modifiedPdb/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.DownloadModifiedPDB.as_view()), #TODO: implement DownloadModifiedPDB
     path('', include(router.urls)),
 ]

@@ -297,6 +297,7 @@ class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
         """
         Get fake data json for pdb_id, chain_id
         """
+        pdb_id= pdb_id.lower()
         #TODO: implment this
         x= models.Entry.objects.get(entryId__iexact=pdb_id, entryTypet=ENTRY_TYPES[1])
         logger.debug(x)
