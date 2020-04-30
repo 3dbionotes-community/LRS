@@ -30,6 +30,7 @@ REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
 
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
+ANN_TYPES_DICT={"localResolution":[DEEP_RES_FNAME_TEMPLATE, MONORES_FNAME_TEMPLATE]}
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -197,6 +198,7 @@ class PdbEntryLocResUtils(object):
 
     def _getJsonFromFname(self, fneme, chain_id):
       residues=[]
+      values= []
       with open(fneme) as f:
         for line in f:
           if not "CA" in line or not "ATOM" in line: continue
@@ -205,9 +207,10 @@ class PdbEntryLocResUtils(object):
           resId= line[22:26].strip()
           bFactor= line[55:60].strip()
           residues.append( {"begin":resId, "value":bFactor} )
+          values.append( float(bFactor) )
       if len(residues)==0:
         return None
-      return {"chain":chain_id, "data":residues}
+      return {"chain":chain_id, "data":residues, "minVal": min(values), "maxVal": max(values) }
 
     def _findFname(self, pdb_id, target="monores"):
       #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
@@ -220,6 +223,11 @@ class PdbEntryLocResUtils(object):
       else:
         raise ValueError("Error, options are 'monores' and 'deepres'")
       # get from DB
+
+      return self._locateFname( targetFname)
+
+
+    def _locateFname(self, targetFname):
       try:
           logger.debug("Searching %s in DB", pdb_id)
           fileRecord = models.DataFile.objects.get(filename__iexact= targetFname )
@@ -237,9 +245,7 @@ class PdbEntryLocResUtils(object):
             for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
                 if fname== targetFname:
                     return os.path.join(LOCAL_DATA_DIR, dirName, fname)
-
       return None
-
 
 class PdbEntryLocResAnyAlgorithm(APIView, PdbEntryLocResUtils):
     """
@@ -277,7 +283,7 @@ class PdbEntryLocResAnyAlgorithm(APIView, PdbEntryLocResUtils):
         return Response(jsonLocRes)
 
 
-class PdbEntryLocResAllAlgorithm(APIView, PdbEntryLocResUtils):
+class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
     """
     Retrieve an annotation entry `details`.
     """
@@ -294,41 +300,23 @@ class PdbEntryLocResAllAlgorithm(APIView, PdbEntryLocResUtils):
                         "detail": "entryId _strictly_ must be in the form `####/#`" }
 
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        responseData=[]
+        for algFamily in ANN_TYPES_DICT:
+          for algoName in ANN_TYPES_DICT[algFamily]:
+            pdbFname=  ANN_TYPES_DICT[algFamily][algoName]%(pdb_id)
+            pdbFname= self._locateFname(pdbFname)
+            if pdbFname is not None:
+                algoDataDict= self._getJsonFromFname(pdbFname, chain_id)
+                if algoDataDict is not None:
+                    algoDataDict["algorithm"]=algoName
+                    algoDataDict["algoType"]=algFamily
+                    responseData.append(algoDataDict)
 
-        algoName1= "monores"
-        pdbFname1= self._findFname(pdb_id, algoName1)
-
-        algoName2= "deepres"
-        pdbFname2= self._findFname(pdb_id, algoName2)
-
-        if pdbFname1 is None and pdbFname2 is None:
-            return not_found_resp(pdb_id)
-        elif pdbFname1 is None and pdbFname2 is not None:
-            jsonLocRes= self._getJsonFromFname(pdbFname2, chain_id)
-            if jsonLocRes is not None:
-                jsonLocRes["algorithm"]=algoName2
-                jsonLocRes=  [jsonLocRes]
-        elif pdbFname1 is not None and pdbFname2 is None:
-            jsonLocRes= self._getJsonFromFname(pdbFname1, chain_id)
-            if jsonLocRes is not None:
-                jsonLocRes["algorithm"]=algoName1
-                jsonLocRes=  [jsonLocRes]
-        else:
-            jsonLocRes1= self._getJsonFromFname(pdbFname1, chain_id)
-            jsonLocRes2= self._getJsonFromFname(pdbFname1, chain_id)
-            jsonLocRes=[]
-            for pdbFname, algName in zip([pdbFname1, pdbFname2], [algoName1, algoName2]):
-              jsonLocResTmp= self._getJsonFromFname(pdbFname, chain_id)
-              if jsonLocResTmp is not None:
-                jsonLocResTmp["algorithm"]=algName
-                jsonLocRes.append( jsonLocResTmp)
-
-            if len(jsonLocRes)==0:
-                jsonLocRes=None
-        if jsonLocRes is None:
-          logger.debug("Not found %s in file system", pdb_id+"/"+chain_id)
+        if len(responseData)==0
+          logger.debug("Not found %s", pdb_id+"/"+chain_id)
           return not_found_resp(pdb_id)
-        return Response(jsonLocRes)
+
+        return Response(responseData)
 
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
