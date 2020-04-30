@@ -277,6 +277,54 @@ class PdbEntryLocAnyAlgorithm(APIView, PdbEntryLocResUtils):
         return Response(jsonLocRes)
 
 
+class PdbEntryLocAllAlgorithm(APIView, PdbEntryLocResUtils):
+    """
+    Retrieve an annotation entry `details`.
+    """
+
+    def get(self, request, pdb_id, chain_id, format=None):
+        """
+        Get fake data json for pdb_id, chain_id
+        """
+
+        pdb_id= pdb_id.lower()
+        if not re.search(REGEX_PDB_ID, pdb_id):
+            logger.debug("Bad Request Entry ID: %s", pdb_id)
+            content = { "request":pdb_id, 
+                        "detail": "entryId _strictly_ must be in the form `####/#`" }
+
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        algoName1= "monores"
+        pdbFname1= self._findFname(pdb_id, algoName1)
+
+        algoName2= "deepres"
+        pdbFname1= self._findFname(pdb_id, algoName2)
+
+        if pdbFname1 is None and pdbFname2 is None:
+            return not_found_resp(pdb_id)
+        elif pdbFname1 is None and pdbFname2 is not None:
+            jsonLocRes= self._getJsonFromFname(pdbFname2, chain_id)
+            jsonLocRes= None if jsonLocRes is None else [self._getJsonFromFname(pdbFname2, chain_id)]
+        elif pdbFname1 is not None and pdbFname2 is None:
+            jsonLocRes= self._getJsonFromFname(pdbFname1, chain_id)
+            jsonLocRes= None if jsonLocRes is None else [self._getJsonFromFname(pdbFname1, chain_id)]
+        else:
+            jsonLocRes1= self._getJsonFromFname(pdbFname1, chain_id)
+            jsonLocRes2= self._getJsonFromFname(pdbFname1, chain_id)
+            jsonLocRes=[]
+            for pdbFname in [pdbFname1, pdbFname2]:
+              jsonLocResTmp= self._getJsonFromFname(pdbFname, chain_id)
+              if jsonLocResTmp is not None:
+                jsonLocRes.append( jsonLocResTmp)
+
+            if len(jsonLocRes)==0:
+                jsonLocRes=None
+        if jsonLocRes is None:
+          logger.debug("Not found %s in file system", pdb_id+"/"+chain_id)
+          return not_found_resp(pdb_id)
+        return Response(jsonLocRes)
+
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
