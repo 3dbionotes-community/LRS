@@ -305,17 +305,23 @@ class PdbEntryLocAllAlgorithm(APIView, PdbEntryLocResUtils):
             return not_found_resp(pdb_id)
         elif pdbFname1 is None and pdbFname2 is not None:
             jsonLocRes= self._getJsonFromFname(pdbFname2, chain_id)
+            if jsonLocRes is not None:
+                jsonLocRes["algorithm"]=algoName2
+                jsonLocRes=  [jsonLocRes]
             jsonLocRes= None if jsonLocRes is None else [self._getJsonFromFname(pdbFname2, chain_id)]
         elif pdbFname1 is not None and pdbFname2 is None:
             jsonLocRes= self._getJsonFromFname(pdbFname1, chain_id)
-            jsonLocRes= None if jsonLocRes is None else [self._getJsonFromFname(pdbFname1, chain_id)]
+            if jsonLocRes is not None:
+                jsonLocRes["algorithm"]=algoName1
+                jsonLocRes=  [jsonLocRes]
         else:
             jsonLocRes1= self._getJsonFromFname(pdbFname1, chain_id)
             jsonLocRes2= self._getJsonFromFname(pdbFname1, chain_id)
             jsonLocRes=[]
-            for pdbFname in [pdbFname1, pdbFname2]:
+            for pdbFname, algName in zip([pdbFname1, pdbFname2], [algoName1, algoName2]):
               jsonLocResTmp= self._getJsonFromFname(pdbFname, chain_id)
               if jsonLocResTmp is not None:
+                jsonLocResTmp["algorithm"]=algName
                 jsonLocRes.append( jsonLocResTmp)
 
             if len(jsonLocRes)==0:
