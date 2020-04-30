@@ -25,6 +25,7 @@ DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
 MAPQ_FNAME_TEMPLATE="%(pdb_id)s.mapq.aa.pdb"
 ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}, "modelQuality":{"mapq":MAPQ_FNAME_TEMPLATE}}
+ANN_TYPES_MIN_VAL={"localResolution":{"deepres":1.5, "monores":1.5}, "modelQuality":{"mapq":-1}}
 
 
 
@@ -212,7 +213,7 @@ class PdbEntryFakeView(APIView):
 class PdbEntryLocResUtils(object):
 
 
-    def _getJsonFromFname(self, fneme, chain_id):
+    def _getJsonFromFname(self, fneme, chain_id, minToFilter=-1):
       residues=[]
       values= []
       with open(fneme) as f:
@@ -227,26 +228,12 @@ class PdbEntryLocResUtils(object):
       if len(residues)==0:
         return None
       print(values)
-      return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > 1.5]), "maxVal": max(values) }
-
-    def _findFname(self, pdb_id, target="monores"):
-      #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
-      target= target.lower()
-      if target=="monores":
-        targetFname= MONORES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
-      elif target=="deepres":
-        targetFname= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
-      else:
-        raise ValueError("Error, options are 'monores' and 'deepres'")
-      # get from DB
-
-      return self._locateFname( targetFname)
-
+      return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > minToFilter]), "maxVal": max(values) }
 
     def _locateFname(self, targetFname):
       try:
           logger.debug("Searching %s in DB", targetFname)
-          fileRecord = models.DataFile.objects.get(filename__iexact= targetFname )
+          fileRecord = models.DataFile.objects.get(filename__iexact= targetFname, fileType__iexact=ENTRY_TYPES[0])
           if fileRecord:
             return os.path.join(fileRecord.path, fileRecord.filename)
           else:
@@ -263,40 +250,7 @@ class PdbEntryLocResUtils(object):
                     return os.path.join(EMDB_DATA_DIR, dirName, fname)
       return None
 
-class PdbEntryLocResAnyAlgorithm(APIView, PdbEntryLocResUtils):
-    """
-    Retrieve an annotation entry `details`.
-    """
 
-    def get(self, request, pdb_id, chain_id, format=None):
-        """
-        Get fake data json for pdb_id, chain_id
-        """
-
-        pdb_id= pdb_id.lower()
-        if not re.search(REGEX_PDB_ID, pdb_id):
-            logger.debug("Bad Request Entry ID: %s", pdb_id)
-            content = { "request":pdb_id, 
-                        "detail": "entryId _strictly_ must be in the form `####/#`" }
-
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-        algoName= "monores"
-        pdbFname= self._findFname(pdb_id, algoName)
-        if pdbFname is None:
-            algoName= "deepres"
-            pdbFname= self._findFname(pdb_id, algoName)
-
-        if pdbFname is None:
-            return not_found_resp(pdb_id)
-        else:
-            jsonLocRes=self._getJsonFromFname(pdbFname, chain_id)
-            jsonLocRes["algorithm"]=algoName
-
-        if jsonLocRes is None:
-          logger.debug("Not found %s in file system", pdb_id+"/"+chain_id)
-          return not_found_resp(pdb_id)
-        return Response(jsonLocRes)
 
 
 class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
@@ -322,7 +276,7 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
             pdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
             pdbFname= self._locateFname(pdbFname)
             if pdbFname is not None:
-                algoDataDict= self._getJsonFromFname(pdbFname, chain_id)
+                algoDataDict= self._getJsonFromFname(pdbFname, chain_id, minToFilter= ANN_TYPES_MIN_VAL[algFamily][algoName] )
                 if algoDataDict is not None:
                     algoDataDict["algorithm"]=algoName
                     algoDataDict["algoType"]=algFamily
