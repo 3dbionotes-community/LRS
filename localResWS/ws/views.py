@@ -241,7 +241,7 @@ class PdbEntryLocResUtils(object):
       return None
 
 
-class PdbEntryLocAnyAlgorithm(APIView, PdbEntryLocResUtils):
+class PdbEntryLocResAnyAlgorithm(APIView, PdbEntryLocResUtils):
     """
     Retrieve an annotation entry `details`.
     """
@@ -277,7 +277,7 @@ class PdbEntryLocAnyAlgorithm(APIView, PdbEntryLocResUtils):
         return Response(jsonLocRes)
 
 
-class PdbEntryLocAllAlgorithm(APIView, PdbEntryLocResUtils):
+class PdbEntryLocResAllAlgorithm(APIView, PdbEntryLocResUtils):
     """
     Retrieve an annotation entry `details`.
     """
