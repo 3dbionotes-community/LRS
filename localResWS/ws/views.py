@@ -192,7 +192,7 @@ class PdbEntryFakeView(APIView):
         return Response(fakeJson)
 
 
-class PdbEntryLocResUtils(Object):
+class PdbEntryLocResUtils(object):
 
 
     def _getJsonFromFname(self, fneme, chain_id):
