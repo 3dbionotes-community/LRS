@@ -299,7 +299,7 @@ class PdbEntryLocAllAlgorithm(APIView, PdbEntryLocResUtils):
         pdbFname1= self._findFname(pdb_id, algoName1)
 
         algoName2= "deepres"
-        pdbFname1= self._findFname(pdb_id, algoName2)
+        pdbFname2= self._findFname(pdb_id, algoName2)
 
         if pdbFname1 is None and pdbFname2 is None:
             return not_found_resp(pdb_id)
