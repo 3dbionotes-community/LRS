@@ -333,6 +333,21 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
 
         return Response(responseData)
 
+
+class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
+    """
+    Retrieve an annotation entry `details`.
+    """
+
+    def get(self, request, model_type, pdb_id, format=None):
+        """
+        Get fake data json for pdb_id, chain_id
+        """
+        #TODO: implment this
+
+        return Response(responseData)
+
+
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
