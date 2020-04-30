@@ -30,7 +30,7 @@ REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
 
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
-ANN_TYPES_DICT={"localResolution":[DEEP_RES_FNAME_TEMPLATE, MONORES_FNAME_TEMPLATE]}
+ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE]}
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
