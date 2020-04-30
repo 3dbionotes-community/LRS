@@ -299,7 +299,7 @@ class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
         """
         pdb_id= pdb_id.lower()
         #TODO: implment this
-        x= models.Entry.objects.get(entryId__iexact=pdb_id, entryTypet=ENTRY_TYPES[1])
+        x= models.Entry.objects.get(entryId__iexact=pdb_id, entryType=ENTRY_TYPES[1])
         logger.debug(x)
 
         return Response(responseData)
