@@ -121,12 +121,12 @@ def update_DB_from_Disk():
 
     for pdbId, listOfFnames in findIsolde().items():
         try:
-            models.Entry.objects.get(entryId__iexact=dir_name, entryType__iexact=ENTRY_TYPES[1])
+            models.Entry.objects.get(entryId__iexact=pdbId, entryType__iexact=ENTRY_TYPES[1])
         except (models.Entry.DoesNotExist) as exc:
             # logger.exception(exc)
             # new entry
             logger.debug('Creating new isolde entry: %s from %s', pdbId)
-            entry = models.Entry(entryId=dir_name, path=THORN_DATA_DIR, entryTypet=ENTRY_TYPES[1])
+            entry = models.Entry(entryId=pdbId, path=THORN_DATA_DIR, entryTypet=ENTRY_TYPES[1])
             entry.save()
             # find files inside
             for filename in listOfFnames:
@@ -227,7 +227,6 @@ class PdbEntryLocResUtils(object):
           values.append(bFactor)
       if len(residues)==0:
         return None
-      print(values)
       return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > minToFilter]), "maxVal": max(values) }
 
     def _locateFname(self, targetFname):
@@ -299,6 +298,8 @@ class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
         Get fake data json for pdb_id, chain_id
         """
         #TODO: implment this
+        x= models.Entry.objects.get(entryId__iexact=pdb_id, entryTypet=ENTRY_TYPES[1])
+        logger.debug(x)
 
         return Response(responseData)
 
