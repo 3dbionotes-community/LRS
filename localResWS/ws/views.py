@@ -308,7 +308,6 @@ class PdbEntryLocAllAlgorithm(APIView, PdbEntryLocResUtils):
             if jsonLocRes is not None:
                 jsonLocRes["algorithm"]=algoName2
                 jsonLocRes=  [jsonLocRes]
-            jsonLocRes= None if jsonLocRes is None else [self._getJsonFromFname(pdbFname2, chain_id)]
         elif pdbFname1 is not None and pdbFname2 is None:
             jsonLocRes= self._getJsonFromFname(pdbFname1, chain_id)
             if jsonLocRes is not None:
