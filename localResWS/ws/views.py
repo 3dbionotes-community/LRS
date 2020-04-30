@@ -192,10 +192,8 @@ class PdbEntryFakeView(APIView):
         return Response(fakeJson)
 
 
-class PdbEntryLocResView(APIView):
-    """
-    Retrieve an annotation entry `details`.
-    """
+class PdbEntryLocResUtils(Object):
+
 
     def _getJsonFromFname(self, fneme, chain_id):
       residues=[]
@@ -243,7 +241,7 @@ class PdbEntryLocResView(APIView):
       return None
 
 
-class PdbEntryLocAnyAlgorithm(PdbEntryLocResView):
+class PdbEntryLocAnyAlgorithm(APIView, PdbEntryLocResUtils):
     """
     Retrieve an annotation entry `details`.
     """
