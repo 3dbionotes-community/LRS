@@ -27,7 +27,9 @@ REGEX_VOL_FILE = re.compile('^local_resol\.vol$')
 REGEX_PDB_FILE = re.compile('^pdb\d\w{3}\.ent$')
 REGEX_LR_FILE = re.compile('^pdb\d\w{3}_LR_\w+\.pdb$')
 REGEX_MAPQ_FILE = re.compile('^pdb\d\w{3}_mapQ_\w+\.pdb$')
+
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
+MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -210,38 +212,62 @@ class PdbEntryLocResView(APIView):
         return None
       return {"chain":chain_id, "data":residues}
 
+    def _findFname(self, pdb_id, target="monores"):
+      #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
+      target= target.lower()
+      jsonLocRes=None
+      if target=="monores":
+        targetFname= MONORES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
+      elif target=="deepres":
+        targetFname= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
+      else:
+        raise ValueError("Error, options are 'monores' and 'deepres'")
+      # get from DB
+      try:
+          logger.debug("Searching %s in DB", pdb_id)
+          fileRecord = models.DataFile.objects.get(filename__iexact= targetFname )
+          if fileRecord:
+            return os.path.join(fileRecord.path, fileRecord.filename)
+          else:
+              logger.debug("Not found %s in DB", pdb_id)
+              return None
+      except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+          logger.exception(exc)
+          # check from disk
+          logger.debug("Searching %s in Disk", pdb_id)
+
+          for dirName in os.listdir(LOCAL_DATA_DIR):
+            for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
+                if fname== targetFname:
+                    return os.path.join(LOCAL_DATA_DIR, dirName, fname)
+
+      return None
+
     def get(self, request, pdb_id, chain_id, format=None):
         """
         Get fake data json for pdb_id, chain_id
         """
+
         pdb_id= pdb_id.lower()
         if not re.search(REGEX_PDB_ID, pdb_id):
             logger.debug("Bad Request Entry ID: %s", pdb_id)
             content = { "request":pdb_id, 
                         "detail": "entryId _strictly_ must be in the form `####/#`" }
+
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-        #TODO: Save jsons into database when using update_DB as if they where Annotations in the data model
-        jsonLocRes=None
-        # get from DB
-        try:
-            logger.debug("Searching %s in DB", pdb_id)
-            fileRecord = models.DataFile.objects.get(filename__iexact= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id} )
-            if fileRecord:
-                jsonLocRes= self._getJsonFromFname( os.path.join(fileRecord.path, fileRecord.filename), chain_id )
-            else:
-                logger.debug("Not found %s in DB", pdb_id)
-                return not_found_resp(pdb_id)
-        except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
-            logger.exception(exc)
-            # check from disk
-            logger.debug("Searching %s in Disk", pdb_id)
-            targetFname= DEEP_RES_FNAME_TEMPLATE%{"pdb_id":pdb_id}
-            for dirName in os.listdir(LOCAL_DATA_DIR):
-              for fname in os.listdir(os.path.join(LOCAL_DATA_DIR, dirName)):
-                  if fname== targetFname:
-                      jsonLocRes= self._getJsonFromFname( os.path.join(os.path.join(LOCAL_DATA_DIR, dirName, fname)), chain_id)
-                      break
+        algoName= "monores"
+        pdbFname= self._findFname(pdb_id, algoName)
+        if pdbFname is None:
+            algoName= "deepres"
+            pdbFname= self._findFname(pdb_id, algoName)
+
+        if pdbFname is None:
+            return not_found_resp(pdb_id)
+        else:
+            jsonLocRes=self._getJsonFromFname(pdbFname, chain_id)
+            jsonLocRes["algorithm"]=algoName
+
         if jsonLocRes is None:
           logger.debug("Not found %s in file system", pdb_id+"/"+chain_id)
           return not_found_resp(pdb_id)
