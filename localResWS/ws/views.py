@@ -102,7 +102,7 @@ def update_DB_from_Disk():
                 # logger.exception(exc)
                 # new entry
                 logger.debug('Creating new entry: %s from %s', dir_name, path)
-                entry = models.Entry(entryId=dir_name, path=path, entryTypet=ENTRY_TYPES[1])
+                entry = models.Entry(entryId=dir_name, path=path, entryType=ENTRY_TYPES[1])
                 entry.save()
                 # find files inside
                 logger.debug('Searching for datafiles: %s ', dir_name)
@@ -126,7 +126,7 @@ def update_DB_from_Disk():
             # logger.exception(exc)
             # new entry
             logger.debug('Creating new isolde entry: %s from %s', pdbId)
-            entry = models.Entry(entryId=pdbId, path=THORN_DATA_DIR, entryTypet=ENTRY_TYPES[1])
+            entry = models.Entry(entryId=pdbId, path=THORN_DATA_DIR, entryType=ENTRY_TYPES[1])
             entry.save()
             # find files inside
             for filename in listOfFnames:
