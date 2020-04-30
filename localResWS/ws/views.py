@@ -312,7 +312,7 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
                     algoDataDict["algoType"]=algFamily
                     responseData.append(algoDataDict)
 
-        if len(responseData)==0
+        if len(responseData)==0:
           logger.debug("Not found %s", pdb_id+"/"+chain_id)
           return not_found_resp(pdb_id)
 
