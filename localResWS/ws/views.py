@@ -221,7 +221,7 @@ class PdbEntryLocResUtils(object):
           chainId= line[21]
           if chainId!=chain_id: continue
           resId= line[22:26].strip()
-          bFactor=  float(line[55:60].strip())
+          bFactor=  float(line[54:60].strip())
           residues.append( {"begin":resId, "value":bFactor} )
           values.append(bFactor)
       if len(residues)==0:
