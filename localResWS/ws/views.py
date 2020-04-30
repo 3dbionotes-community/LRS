@@ -303,7 +303,7 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
         responseData=[]
         for algFamily in ANN_TYPES_DICT:
           for algoName in ANN_TYPES_DICT[algFamily]:
-            pdbFname=  ANN_TYPES_DICT[algFamily][algoName]%(pdb_id)
+            pdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
             pdbFname= self._locateFname(pdbFname)
             if pdbFname is not None:
                 algoDataDict= self._getJsonFromFname(pdbFname, chain_id)
