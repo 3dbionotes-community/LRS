@@ -115,7 +115,6 @@ def update_DB_from_Disk():
                             data_file = models.DataFile(filename=filename, path=path, entry=entry, fileType=FILE_TYPES[0])
                             data_file.save()
                 entry_list.append(entry)
-        return entry_list
     except() as exc:
         logger.exception(exc)
 
@@ -134,11 +133,9 @@ def update_DB_from_Disk():
                 data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0], entry=entry, fileType=FILE_TYPES[1])
                 data_file.save()
             entry_list.append(entry)
+
     return entry_list
 
-
-
-    return
 
 def getEntryFiles(entryId):
     logger.debug("Get entry files for %s", entryId)
@@ -298,7 +295,7 @@ class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
         Get fake data json for pdb_id, chain_id
         """
         pdb_id= pdb_id.lower()
-        #TODO: implment this
+        #TODO: implement this
         x= models.Entry.objects.get(entryId__iexact=pdb_id, entryType=ENTRY_TYPES[1])
         logger.debug(x)
 
