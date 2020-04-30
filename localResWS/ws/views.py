@@ -299,6 +299,8 @@ class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
         # entry= models.Entry.objects.get(entryId__iexact=pdb_id, entryType__iexact=ENTRY_TYPES[1])
         fileRecords= models.DataFile.objects.filter(entry__entryId=pdb_id, fileType__iexact=FILE_TYPES[1])
         logger.debug(fileRecords)
+        for record in fileRecords:
+            print(record)
 
         return Response(responseData)
 
