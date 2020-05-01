@@ -14,7 +14,9 @@ from wsgiref.util import FileWrapper
 from localResWS.ws import models, serializers
 from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
-from localResWS.ws.utils import updateDB_modifiedPdbs, logger
+from localResWS.ws.utils import updateDB_modifiedPdbs
+import logging
+logger = logging.getLogger(__name__)
 
 REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
 REGEX_PDB_ID = re.compile('^\d\w{3}$')
@@ -283,7 +285,9 @@ class DownloadGenericFile(APIView):
         """
         print("getting", file_uuid)
         try:
-            logger.debug("Trying to identify file %s" % file_uuid)
+            logger.debug("Trying to identify file %s" % str(file_uuid))
+            print("getting", file_uuid)
+
             fileRecord= models.DataFile.objects.get(unique_id__iexact=uuid.UUID(file_uuid))
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             logger.debug("Error not found: %s" % file_uuid)

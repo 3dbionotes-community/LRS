@@ -3,12 +3,11 @@ import re
 
 from subprocess import check_output
 
-import logging
 
 from localResWS.ws import models
 from localResWS.ws.dataPaths import THORN_DATA_DIR
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
-
+import logging
 logger = logging.getLogger(__name__)
 
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
