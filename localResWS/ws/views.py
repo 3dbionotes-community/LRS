@@ -169,24 +169,8 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
 
         for algFamily in ANN_TYPES_DICT:
           for algoName in ANN_TYPES_DICT[algFamily]:
-
-            try:
-              import time
-              print(time.time(), pdb_id, ENTRY_TYPES[0], flush=True)
-              fileRecords = models.DataFile.objects.filter(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0])
-              for record in fileRecords:
-                  print(record)
-                  print(record.filename, record.method, flush=True)
-
-
-              fileRecord = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
-                                                           fileType__iexact=FILE_TYPES[0], method__iexact=algoName)
-              modifiedPdbFname= os.path.join(fileRecord.path, fileRecord.filename)
-              print("modifiedPdbFname", modifiedPdbFname)
-            except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
-                print("exc", exc)
-                modifiedPdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
-                modifiedPdbFname= self._locateFname(modifiedPdbFname)
+            modifiedPdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
+            modifiedPdbFname= self._locateFname(modifiedPdbFname)
             if modifiedPdbFname is not None:
                 algoDataDict= self._getJsonFromFname(modifiedPdbFname, chain_id, minToFilter= ANN_TYPES_MIN_VAL[algFamily][algoName] )
                 if algoDataDict is not None:
