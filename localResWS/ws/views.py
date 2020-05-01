@@ -174,7 +174,9 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
               fileRecord = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
                                                            fileType__iexact=FILE_TYPES[0], method=algoName)
               modifiedPdbFname= os.path.join(fileRecord.path, fileRecord.filename)
+              print("modifiedPdbFname", modifiedPdbFname)
             except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+                print("exc", exc)
                 modifiedPdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
                 modifiedPdbFname= self._locateFname(modifiedPdbFname)
             if modifiedPdbFname is not None:
