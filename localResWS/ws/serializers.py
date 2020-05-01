@@ -51,7 +51,9 @@ class DataFileSerializer(serializers.ModelSerializer):
     data = DataFileNestedSerializer(many=True, read_only=True)
     class Meta:
         model = models.DataFile
-        fields = ['unique_id', 'filename', 'entry', 'path', 'data', 'fileType']
+        # fields = ['unique_id', 'filename', 'entry', 'path', 'data', 'fileType']
+        fields = ['unique_id', 'filename', 'entry', 'data', 'fileType']
+        exclude = ['path']
 
 
 class DataSetSerializer(serializers.ModelSerializer):

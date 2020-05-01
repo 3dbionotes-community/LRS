@@ -71,13 +71,3 @@ def updateDB_modifiedPdbs(modelType):
 
     return entry_list
 
-
-
-
-
-
-def dataFnameToDownloadUrl(modelType, pdbId, uuid):
-  uuid= str(uuid)
-  newUrl="files/modifiedPdb/download/%(modelType)s/%(pdbId)s/%(uuid)s"%locals()
-  return newUrl
-

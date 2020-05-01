@@ -1,16 +1,20 @@
 import os
 import re
+import uuid
 
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 from rest_framework import (permissions,
                             status, viewsets)
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from wsgiref.util import FileWrapper
 
 from localResWS.ws import models, serializers
 from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
-from localResWS.ws.utils import dataFnameToDownloadUrl, updateDB_modifiedPdbs, logger
+from localResWS.ws.utils import updateDB_modifiedPdbs, logger
 
 REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
 REGEX_PDB_ID = re.compile('^\d\w{3}$')
@@ -233,7 +237,7 @@ class PdbEntryLocResUtils(object):
 
 
 
-class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
+class PdbEntryAllAnnAlgorithm(APIView):
     """
     Retrieve an annotation entry `details`.
     """
@@ -269,17 +273,27 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
         return Response(responseData)
 
 
-class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
+class DownloadModifiedPDB(APIView):
     """
     Retrieve an annotation entry `details`.
     """
 
-    def get(self, request, model_type, pdb_id, model_id, format=None):
+    def get(self, request, model_id, format=None):
         """
         Provide downloading links for modified pdbs
         """
-        pdb_id= pdb_id.lower()
-        return Response(responseData)
+        try:
+            fileRecord= models.DataFile.objects.get( unique_id__iexact=uuid.UUID(model_id))
+        except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+            return HttpResponseNotFound()
+
+        fullName= os.path.join(fileRecord.path, fileRecord.filename)
+        logger.debug("Trying to download %s"%fullName)
+        with open(fullName, "rb") as fileObj:
+            response = HttpResponse(FileWrapper(fileObj),
+                                    content_type='application/x-gzip')
+            response['Content-Disposition'] = 'attachment; filename="%s"' % fileRecord.filename
+            return response
 
 
 class ListModifiedPDB(APIView, PdbEntryLocResUtils):
@@ -303,7 +317,7 @@ class ListModifiedPDB(APIView, PdbEntryLocResUtils):
         responseData={}
         for record in fileRecords:
             print(record)
-            url= dataFnameToDownloadUrl(model_type, pdb_id, record.unique_id)
+            url= "files/modifiedPdb/download/%s"%record.unique_id
             responseData[record.filename]= url
         return Response(responseData)
 
