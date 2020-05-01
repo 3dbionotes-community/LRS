@@ -110,7 +110,7 @@ def updateDB_annoFromMaps():
         # logger.exception(exc)
         # new entry
         logger.debug('Creating new entry: %s from %s', dir_name, path)
-        entry = models.Entry(entryId=dir_name, path=path, entryType=ENTRY_TYPES[1])
+        entry = models.Entry(entryId=dir_name, path=path, entryType=ENTRY_TYPES[0])
         entry.save()
         # find files inside
         logger.debug('Searching for datafiles: %s ', dir_name)
