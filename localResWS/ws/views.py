@@ -285,9 +285,9 @@ class DownloadGenericFile(APIView):
         """
         print("getting", file_uuid)
         try:
+            print("antes de logger", file_uuid)
             logger.debug("Trying to identify file %s" % str(file_uuid))
             print("getting", file_uuid)
-
             fileRecord= models.DataFile.objects.get(unique_id__iexact=uuid.UUID(file_uuid))
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             logger.debug("Error not found: %s" % file_uuid)
