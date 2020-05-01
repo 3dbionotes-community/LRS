@@ -171,8 +171,16 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
           for algoName in ANN_TYPES_DICT[algFamily]:
 
             try:
+
+              fileRecords = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
+                                                           fileType__iexact=FILE_TYPES[0])
+              for record in fileRecords:
+                  print(record)
+                  print(record.filename, record.method)
+
+
               fileRecord = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
-                                                           fileType__iexact=FILE_TYPES[0], method=algoName)
+                                                           fileType__iexact=FILE_TYPES[0], method__iexact=algoName)
               modifiedPdbFname= os.path.join(fileRecord.path, fileRecord.filename)
               print("modifiedPdbFname", modifiedPdbFname)
             except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
