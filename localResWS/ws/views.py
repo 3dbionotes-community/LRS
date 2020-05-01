@@ -281,7 +281,7 @@ class DownloadGenericFile(APIView):
     def get(self, request, file_uuid, format=None):
         """
         """
-        print(file_uuid)
+        print("getting", file_uuid)
         try:
             logger.debug("Trying to identify file %s" % file_uuid)
             fileRecord= models.DataFile.objects.get(unique_id__iexact=uuid.UUID(file_uuid))
