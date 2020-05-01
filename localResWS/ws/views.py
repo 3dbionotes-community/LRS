@@ -326,6 +326,9 @@ class ListModifiedPDB(APIView ):
         for record in fileRecords:
             url= "files/modifiedPdb/download/%s"%record.unique_id
             responseData[record.filename]= url
+        if len(responseData)==0:
+          logger.debug("Not found %s", pdb_id+"/"+model_type)
+          return not_found_resp(pdb_id+"/"+model_type)
         return Response(responseData)
 
 class EntryListUpdateView(APIView):

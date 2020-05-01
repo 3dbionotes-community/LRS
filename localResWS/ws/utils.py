@@ -12,9 +12,11 @@ logger = logging.getLogger(__name__)
 
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
 
-def findIsolde(dirToLook=THORN_DATA_DIR):
+
+
+def findGeneric(pattern, dirToLook=THORN_DATA_DIR):
   data={}
-  cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", "*isolde/*pdb"]
+  cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", pattern]
   logger.debug(" ".join(cmd))
   isoldesCandidates= check_output(cmd ).decode()
   for candidate in isoldesCandidates.split("\n"):
@@ -28,20 +30,12 @@ def findIsolde(dirToLook=THORN_DATA_DIR):
   return data
 
 
+def findIsolde(dirToLook=THORN_DATA_DIR):
+  return findGeneric("*isolde/*pdb", dirToLook=dirToLook)
+
 def findPdbRedo(dirToLook=THORN_DATA_DIR):
-  data={}
-  cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", "*pdb-redo/*final.pdb"]
-  pdbRedoCandidates= check_output(cmd ).decode()
-  for candidate in pdbRedoCandidates.split("\n"):
-    if "isolde" in candidate: continue
-    matchObj= re.match(PDB_FOLDER_PATTERN, candidate)
-    if matchObj:
-      pdbId= matchObj.group(1)
-      try:
-        data[pdbId].append(candidate)
-      except KeyError:
-        data[pdbId]=[candidate]
-  return data
+  return findGeneric("*/validation/pdb-redo/*final.pdb", dirToLook=dirToLook)
+
 
 def updateDB_modifiedPdbs(modelType):
     entry_list=[]
