@@ -273,18 +273,18 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
         return Response(responseData)
 
 
-class DownloadModifiedPDB(APIView):
+class DownloadGenericFile(APIView):
     """
     Retrieve an annotation entry `details`.
     """
 
-    def get(self, request, model_id, format=None):
+    def get(self, request, file_uuid, format=None):
         """
-        Provide downloading links for modified pdbs
         """
+        print(file_uuid)
         try:
-            logger.debug("Trying to identify file %s" % model_id)
-            fileRecord= models.DataFile.objects.get( unique_id__iexact=uuid.UUID(model_id))
+            logger.debug("Trying to identify file %s" % file_uuid)
+            fileRecord= models.DataFile.objects.get(unique_id__iexact=uuid.UUID(file_uuid))
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             return HttpResponseNotFound()
 
