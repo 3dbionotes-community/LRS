@@ -3,7 +3,7 @@ import re
 
 from subprocess import check_output
 
-from pip.utils import logging
+import logging
 
 from localResWS.ws import models
 from localResWS.ws.dataPaths import THORN_DATA_DIR
