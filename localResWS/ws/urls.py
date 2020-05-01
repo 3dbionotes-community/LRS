@@ -18,6 +18,6 @@ urlpatterns = [
     re_path(r'^lrs/fakeLR/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
     re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryAllAnnAlgorithm.as_view()),
     re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$',views.ListModifiedPDB.as_view()),
-    re_path(r'^files/modifiedPdb/download/(?P<model_id>[0-9a-f-]+)$', views.DownloadModifiedPDB.as_view()), #TODO: implement DownloadModifiedPDB
+    re_path(r'^files/modifiedPdb/download/(?P<model_id>[0-9a-f-]+)/$', views.DownloadModifiedPDB.as_view())
     path('', include(router.urls)),
 ]
