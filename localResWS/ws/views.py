@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from localResWS.ws import models, serializers
-from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR, THORN_DATA_DIR
+from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
-from localResWS.ws.utils import findIsolde
+from localResWS.ws.utils import dataFnameToDownloadUrl, updateDB_modifiedPdbs
 
 logger = logging.getLogger(__name__)
 REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
@@ -118,21 +118,7 @@ def update_DB_from_Disk():
     except() as exc:
         logger.exception(exc)
 
-    for pdbId, listOfFnames in findIsolde().items():
-        try:
-            models.Entry.objects.get(entryId__iexact=pdbId, entryType__iexact=ENTRY_TYPES[1])
-        except (models.Entry.DoesNotExist) as exc:
-            # logger.exception(exc)
-            # new entry
-            logger.debug('Creating new isolde entry: %s', pdbId)
-            entry = models.Entry(entryId=pdbId, path=THORN_DATA_DIR, entryType=ENTRY_TYPES[1])
-            entry.save()
-            # find files inside
-            for filename in listOfFnames:
-                logger.debug('Creating new dataFile %s record', filename)
-                data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0], entry=entry, fileType=FILE_TYPES[1])
-                data_file.save()
-            entry_list.append(entry)
+    entry_list+= updateDB_modifiedPdbs("isolde")
 
     return entry_list
 
@@ -256,7 +242,7 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
 
     def get(self, request, pdb_id, chain_id, format=None):
         """
-        Get fake data json for pdb_id, chain_id
+        Get all map derived annotations related to one pdb_id, chain_id
         """
 
         pdb_id= pdb_id.lower()
@@ -290,20 +276,38 @@ class DownloadModifiedPDB(APIView, PdbEntryLocResUtils):
     Retrieve an annotation entry `details`.
     """
 
-    def get(self, request, model_type, pdb_id, format=None):
+    def get(self, request, model_type, pdb_id, model_id, format=None):
         """
-        Get fake data json for pdb_id, chain_id
+        Provide downloading links for modified pdbs
         """
         pdb_id= pdb_id.lower()
-        #TODO: implement this
-        # entry= models.Entry.objects.get(entryId__iexact=pdb_id, entryType__iexact=ENTRY_TYPES[1])
-        fileRecords= models.DataFile.objects.filter(entry__entryId=pdb_id, fileType__iexact=FILE_TYPES[1])
-        logger.debug(fileRecords)
-        for record in fileRecords:
-            print(record)
-
         return Response(responseData)
 
+
+class ListModifiedPDB(APIView, PdbEntryLocResUtils):
+    """
+    Retrieve an annotation entry `details`.
+    """
+
+    def get(self, request, model_type, pdb_id, format=None):
+        """
+        Provide downloading links for modified pdbs
+        """
+        pdb_id = pdb_id.lower()
+        try:
+            fileRecords = models.DataFile.objects.filter(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[1],
+                                                     fileType__iexact=FILE_TYPES[1])
+        except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+            #TODO: try to find files locally using findPdbRedo / findIsolde and create the database entry before error.
+            return not_found_resp(model_type+"/"+model_type)
+
+        logger.debug(fileRecords)
+        responseData={}
+        for record in fileRecords:
+            print(record)
+            url= dataFnameToDownloadUrl(model_type, pdb_id, record.unique_id)
+            responseData[record.filename]= url
+        return Response(responseData)
 
 class EntryListUpdateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
