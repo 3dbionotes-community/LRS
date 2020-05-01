@@ -172,7 +172,7 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
 
             try:
               import time
-              print(time.time(), flush=True)
+              print(time.time(), pdb_id, ENTRY_TYPES[0], flush=True)
               fileRecords = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0])
               for record in fileRecords:
                   print(record)
