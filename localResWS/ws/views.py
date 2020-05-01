@@ -320,7 +320,6 @@ class ListModifiedPDB(APIView ):
         logger.debug(fileRecords)
         responseData={}
         for record in fileRecords:
-            print(record)
             url= "files/modifiedPdb/download/%s"%record.unique_id
             responseData[record.filename]= url
         return Response(responseData)
