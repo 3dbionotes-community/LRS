@@ -172,11 +172,10 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
 
             try:
 
-              fileRecords = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
-                                                           fileType__iexact=FILE_TYPES[0])
+              fileRecords = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0])
               for record in fileRecords:
                   print(record)
-                  print(record.filename, record.method)
+                  print(record.filename, record.method, flush=True)
 
 
               fileRecord = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
