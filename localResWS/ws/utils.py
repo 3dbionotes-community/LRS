@@ -10,8 +10,6 @@ from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
 import logging
 
-from localResWS.ws.views import logger
-
 logger = logging.getLogger(__name__)
 
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
