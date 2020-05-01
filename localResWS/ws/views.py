@@ -283,6 +283,7 @@ class DownloadModifiedPDB(APIView):
         Provide downloading links for modified pdbs
         """
         try:
+            logger.debug("Trying to identify file %s" % model_id)
             fileRecord= models.DataFile.objects.get( unique_id__iexact=uuid.UUID(model_id))
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             return HttpResponseNotFound()
