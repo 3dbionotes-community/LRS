@@ -15,7 +15,7 @@ PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
 def findIsolde(dirToLook=THORN_DATA_DIR):
   data={}
   cmd=["find", os.path.join(dirToLook,"pdb"), "-wholename", "*isolde/*pdb"]
-  print(" ".join(cmd))
+  logger.debug(" ".join(cmd))
   isoldesCandidates= check_output(cmd ).decode()
   for candidate in isoldesCandidates.split("\n"):
     matchObj= re.match(PDB_FOLDER_PATTERN, candidate)
@@ -64,7 +64,7 @@ def updateDB_modifiedPdbs(modelType):
             for filename in listOfFnames:
                 logger.debug('Creating new dataFile %s record', filename)
                 data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0],
-                                            entry=entry, fileType=FILE_TYPES[1])
+                                            entry=entry, fileType=FILE_TYPES[1], method=modelType)
                 data_file.save()
             entry_list.append(entry)
 

@@ -18,12 +18,14 @@ from localResWS.ws.utils import updateDB_modifiedPdbs
 import logging
 logger = logging.getLogger(__name__)
 
-REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
 REGEX_PDB_ID = re.compile('^\d\w{3}$')
-REGEX_VOL_FILE = re.compile('^emd-\d{4,5}\.map$')
-REGEX_PDB_FILE = re.compile('^pdb\d\w{3}\.ent$')
+
+
+REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
+REGEX_VOL_FILE = re.compile('^(emd)-\d{4,5}\.map$')
+REGEX_PDB_FILE = re.compile('^(pdb)\d\w{3}\.ent$')
 REGEX_LR_FILE = re.compile('^\d\w{3}\.(deepres|monores)\.pdb$')
-REGEX_MAPQ_FILE = re.compile('^\d\w{3}\.mapq\.pdb$')
+REGEX_MAPQ_FILE = re.compile('^\d\w{3}\.(mapq)\.pdb$')
 
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
@@ -113,10 +115,11 @@ def update_DB_from_Disk():
                 dir_list = os.listdir(os.path.join(path, dir_name))
                 for filename in dir_list:
                     for reg_exp in reg_expressions:
-                        if reg_exp.match(filename):
+                        matchObj= reg_exp.match(filename)
+                        if matchObj:
                             logger.debug('Found data file %s', filename)
                             logger.debug('Creating new dataFile %s record', filename)
-                            data_file = models.DataFile(filename=filename, path=path, entry=entry, fileType=FILE_TYPES[0])
+                            data_file = models.DataFile(filename=filename, path=path, entry=entry, fileType=FILE_TYPES[0], method=matchObj.group(1))
                             data_file.save()
                 entry_list.append(entry)
     except() as exc:
@@ -313,7 +316,7 @@ class ListModifiedPDB(APIView ):
         pdb_id = pdb_id.lower()
         try:
             fileRecords = models.DataFile.objects.filter(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[1],
-                                                     fileType__iexact=FILE_TYPES[1])
+                                                     fileType__iexact=FILE_TYPES[1], method=model_type)
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             #TODO: try to find files locally using findPdbRedo / findIsolde and create the database entry before error.
             return not_found_resp(model_type+"/"+model_type)

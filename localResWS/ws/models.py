@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 
 ENTRY_TYPES=["emdb", "pdbRemodel", "computationalModel"]
-FILE_TYPES=["PDB_ANN_FROM_MAP", "PDB_REBUILT", "COMPUTATIONAL_MODEL"]
+FILE_TYPES=["PDB_ANN_FROM_MAP", "ISOLDE", "COMPUTATIONAL_MODEL"]
 
 class AnnCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -31,6 +31,7 @@ class DataFile(models.Model):
     path = models.CharField(max_length=255, blank=True, default='')
     entry = models.ForeignKey(Entry, related_name='files', on_delete=models.CASCADE)
     fileType = models.CharField(max_length=12, blank=True, default='')
+    method = models.CharField(max_length=12, blank=True, default='')
 
 
 class Feature(models.Model):
