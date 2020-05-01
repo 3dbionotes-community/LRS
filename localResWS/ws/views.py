@@ -237,7 +237,7 @@ class PdbEntryLocResUtils(object):
 
 
 
-class PdbEntryAllAnnAlgorithm(APIView):
+class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
     """
     Retrieve an annotation entry `details`.
     """
@@ -296,7 +296,7 @@ class DownloadModifiedPDB(APIView):
             return response
 
 
-class ListModifiedPDB(APIView, PdbEntryLocResUtils):
+class ListModifiedPDB(APIView ):
     """
     Retrieve an annotation entry `details`.
     """
