@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 
@@ -11,9 +10,8 @@ from rest_framework.views import APIView
 from localResWS.ws import models, serializers
 from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
-from localResWS.ws.utils import dataFnameToDownloadUrl, updateDB_modifiedPdbs
+from localResWS.ws.utils import dataFnameToDownloadUrl, updateDB_modifiedPdbs, logger
 
-logger = logging.getLogger(__name__)
 REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
 REGEX_PDB_ID = re.compile('^\d\w{3}$')
 REGEX_VOL_FILE = re.compile('^emd-\d{4,5}\.map$')
