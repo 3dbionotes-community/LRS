@@ -1,6 +1,8 @@
+import logging
 import os
 import re
 import uuid
+from wsgiref.util import FileWrapper
 
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
@@ -9,23 +11,17 @@ from rest_framework import (permissions,
                             status, viewsets)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from wsgiref.util import FileWrapper
 
 from localResWS.ws import models, serializers
-from localResWS.ws.dataPaths import LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
+from localResWS.ws.dataPaths import LOCAL_DATA_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
-from localResWS.ws.utils import updateDB_modifiedPdbs
-import logging
+from localResWS.ws.utils import updateDB_modifiedPdbs, updateDB_annoFromMaps, getEntryAnnFromMapsFiles, \
+    PdbEntryAnnFromMapsUtils
+
 logger = logging.getLogger(__name__)
 
 REGEX_PDB_ID = re.compile('^\d\w{3}$')
 
-
-REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
-REGEX_VOL_FILE = re.compile('^(emd)-\d{4,5}\.map$')
-REGEX_PDB_FILE = re.compile('^(pdb)\d\w{3}\.ent$')
-REGEX_LR_FILE = re.compile('^\d\w{3}\.(deepres|monores)\.pdb$')
-REGEX_MAPQ_FILE = re.compile('^\d\w{3}\.(mapq)\.pdb$')
 
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
@@ -95,64 +91,15 @@ def bad_entry_request(query_id):
 
 def update_DB_from_Disk():
     logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
-    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
-    entry_list = []
-    path = os.path.join(LOCAL_DATA_DIR, EMDB_BASEDIR)
-    try:
-        dir_names = [ f.name for f in os.scandir(path) if f.is_dir() and REGEX_EMDB_ID.match(f.name) ]
-        for dir_name in dir_names:
-            # check if entry already exists
-            try:
-                models.Entry.objects.get(entryId__iexact=dir_name, entryType__iexact=ENTRY_TYPES[0])
-            except (models.Entry.DoesNotExist) as exc:
-                # logger.exception(exc)
-                # new entry
-                logger.debug('Creating new entry: %s from %s', dir_name, path)
-                entry = models.Entry(entryId=dir_name, path=path, entryType=ENTRY_TYPES[1])
-                entry.save()
-                # find files inside
-                logger.debug('Searching for datafiles: %s ', dir_name)
-                dir_list = os.listdir(os.path.join(path, dir_name))
-                for filename in dir_list:
-                    for reg_exp in reg_expressions:
-                        matchObj= reg_exp.match(filename)
-                        if matchObj:
-                            logger.debug('Found data file %s', filename)
-                            logger.debug('Creating new dataFile %s record', filename)
-                            data_file = models.DataFile(filename=filename, path=path, entry=entry, fileType=FILE_TYPES[0], method=matchObj.group(1))
-                            data_file.save()
-                entry_list.append(entry)
-    except() as exc:
-        logger.exception(exc)
-
+    entry_list=[]
+    entry_list+=updateDB_annoFromMaps()
     entry_list+= updateDB_modifiedPdbs("isolde")
     entry_list+= updateDB_modifiedPdbs("pdb-redo")
 
     return entry_list
 
 
-def getEntryFiles(entryId):
-    logger.debug("Get entry files for %s", entryId)
-    path = os.path.join(LOCAL_DATA_DIR, entryId)
-    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
-    try:
-        dir_list = os.listdir(path)
-        # new entry
-        logger.debug('Creating new entry: %s from %s', entryId, path)
-        entry = models.Entry(entryId=entryId, path=path)
-        entry.save()
-        for filename in dir_list:
-            for reg_exp in reg_expressions:
-                if reg_exp.match(filename):
-                    logger.debug('Found data file %s', filename)
-                    logger.debug('Creating new dataFile %s record', filename)
-                    data_file = models.DataFile(filename=filename, path=path, entry=entry)
-                    data_file.save()
-        return entry
-    except() as exc:
-        logger.exception(exc)
-
-class EntryDetailView(APIView):
+class EntryAnnFromMapsView(APIView):
     """
     Retrieve an annotation entry `details`.
     """
@@ -177,7 +124,7 @@ class EntryDetailView(APIView):
             # check from disk
             try:
                 logger.debug("Searching %s in Disk", query_id)
-                entry = getEntryFiles(query_id)
+                entry = getEntryAnnFromMapsFiles(query_id)
                 if entry:
                     serializer = serializers.EntrySerializer(entry)
                     return Response(serializer.data)
@@ -201,49 +148,7 @@ class PdbEntryFakeView(APIView):
         return Response(fakeJson)
 
 
-class PdbEntryLocResUtils(object):
-
-
-    def _getJsonFromFname(self, fneme, chain_id, minToFilter=-1):
-      residues=[]
-      values= []
-      with open(fneme) as f:
-        for line in f:
-          if not "CA" in line or not "ATOM" in line: continue
-          chainId= line[21]
-          if chainId!=chain_id: continue
-          resId= line[22:26].strip()
-          bFactor=  float(line[54:60].strip())
-          residues.append( {"begin":resId, "value":bFactor} )
-          values.append(bFactor)
-      if len(residues)==0:
-        return None
-      return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > minToFilter]), "maxVal": max(values) }
-
-    def _locateFname(self, targetFname):
-      try:
-          logger.debug("Searching %s in DB", targetFname)
-          fileRecord = models.DataFile.objects.get(filename__iexact= targetFname, fileType__iexact=ENTRY_TYPES[0])
-          if fileRecord:
-            return os.path.join(fileRecord.path, fileRecord.filename)
-          else:
-              logger.debug("Not found %s in DB", targetFname)
-              return None
-      except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
-          logger.exception(exc)
-          # check from disk
-          logger.debug("Searching %s in Disk", targetFname)
-
-          for dirName in os.listdir(EMDB_DATA_DIR):
-            for fname in os.listdir(os.path.join(EMDB_DATA_DIR, dirName)):
-                if fname== targetFname:
-                    return os.path.join(EMDB_DATA_DIR, dirName, fname)
-      return None
-
-
-
-
-class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
+class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
     """
     Retrieve an annotation entry `details`.
     """
@@ -261,12 +166,19 @@ class PdbEntryAllAnnAlgorithm(APIView, PdbEntryLocResUtils):
 
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
         responseData=[]
+
         for algFamily in ANN_TYPES_DICT:
           for algoName in ANN_TYPES_DICT[algFamily]:
-            pdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
-            pdbFname= self._locateFname(pdbFname)
-            if pdbFname is not None:
-                algoDataDict= self._getJsonFromFname(pdbFname, chain_id, minToFilter= ANN_TYPES_MIN_VAL[algFamily][algoName] )
+
+            try:
+              fileRecord = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0],
+                                                           fileType__iexact=FILE_TYPES[0], method=algoName)
+              modifiedPdbFname= os.path.join(fileRecord.path, fileRecord.filename)
+            except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+                modifiedPdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
+                modifiedPdbFname= self._locateFname(modifiedPdbFname)
+            if modifiedPdbFname is not None:
+                algoDataDict= self._getJsonFromFname(modifiedPdbFname, chain_id, minToFilter= ANN_TYPES_MIN_VAL[algFamily][algoName] )
                 if algoDataDict is not None:
                     algoDataDict["algorithm"]=algoName
                     algoDataDict["algoType"]=algFamily
@@ -304,7 +216,7 @@ class DownloadGenericFile(APIView):
             return response
 
 
-class ListModifiedPDB(APIView ):
+class ListModifiedPDBView(APIView):
     """
     Retrieve an annotation entry `details`.
     """

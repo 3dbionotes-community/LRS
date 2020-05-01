@@ -3,15 +3,24 @@ import re
 
 from subprocess import check_output
 
+from django.core.exceptions import ValidationError
 
 from localResWS.ws import models
-from localResWS.ws.dataPaths import THORN_DATA_DIR
+from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
 import logging
+
+from localResWS.ws.views import logger
+
 logger = logging.getLogger(__name__)
 
 PDB_FOLDER_PATTERN= re.compile(".*/(\d\w{3})/.*\.pdb$")
 
+REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
+REGEX_VOL_FILE = re.compile('^(emd)-\d{4,5}\.map$')
+REGEX_PDB_FILE = re.compile('^(pdb)\d\w{3}\.ent$')
+REGEX_LR_FILE = re.compile('^\d\w{3}\.(deepres|monores)\.pdb$')
+REGEX_MAPQ_FILE = re.compile('^\d\w{3}\.(mapq)\.pdb$')
 
 
 def findGeneric(pattern, dirToLook=THORN_DATA_DIR):
@@ -64,3 +73,101 @@ def updateDB_modifiedPdbs(modelType):
 
     return entry_list
 
+
+
+
+def getEntryAnnFromMapsFiles(entryId):
+    logger.debug("Get entry files for %s", entryId)
+    path = os.path.join(LOCAL_DATA_DIR, entryId)
+    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
+    try:
+        dir_list = os.listdir(path)
+        # new entry
+        logger.debug('Creating new entry: %s from %s', entryId, path)
+        entry = models.Entry(entryId=entryId, path=path)
+        entry.save()
+        for filename in dir_list:
+            for reg_exp in reg_expressions:
+                if reg_exp.match(filename):
+                    logger.debug('Found data file %s', filename)
+                    logger.debug('Creating new dataFile %s record', filename)
+                    data_file = models.DataFile(filename=filename, path=path, entry=entry)
+                    data_file.save()
+        return entry
+    except() as exc:
+        logger.exception(exc)
+
+def updateDB_annoFromMaps():
+  logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
+  reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
+  entry_list = []
+  path = os.path.join(LOCAL_DATA_DIR, EMDB_BASEDIR)
+  try:
+    dir_names = [f.name for f in os.scandir(path) if f.is_dir() and REGEX_EMDB_ID.match(f.name)]
+    for dir_name in dir_names:
+      # check if entry already exists
+      try:
+        models.Entry.objects.get(entryId__iexact=dir_name, entryType__iexact=ENTRY_TYPES[0])
+      except (models.Entry.DoesNotExist) as exc:
+        # logger.exception(exc)
+        # new entry
+        logger.debug('Creating new entry: %s from %s', dir_name, path)
+        entry = models.Entry(entryId=dir_name, path=path, entryType=ENTRY_TYPES[1])
+        entry.save()
+        # find files inside
+        logger.debug('Searching for datafiles: %s ', dir_name)
+        dir_list = os.listdir(os.path.join(path, dir_name))
+        for filename in dir_list:
+          for reg_exp in reg_expressions:
+            matchObj = reg_exp.match(filename)
+            if matchObj:
+              logger.debug('Found data file %s', filename)
+              logger.debug('Creating new dataFile %s record', filename)
+              data_file = models.DataFile(filename=filename, path=path, entry=entry, fileType=FILE_TYPES[0],
+                                          method=matchObj.group(1))
+              data_file.save()
+        entry_list.append(entry)
+  except() as exc:
+    logger.exception(exc)
+
+  return entry_list
+
+
+class PdbEntryAnnFromMapsUtils(object):
+
+
+    def _getJsonFromFname(self, fneme, chain_id, minToFilter=-1):
+      residues=[]
+      values= []
+      with open(fneme) as f:
+        for line in f:
+          if not "CA" in line or not "ATOM" in line: continue
+          chainId= line[21]
+          if chainId!=chain_id: continue
+          resId= line[22:26].strip()
+          bFactor=  float(line[54:60].strip())
+          residues.append( {"begin":resId, "value":bFactor} )
+          values.append(bFactor)
+      if len(residues)==0:
+        return None
+      return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > minToFilter]), "maxVal": max(values) }
+
+    def _locateFname(self, targetFname):
+      try:
+          logger.debug("Searching %s in DB", targetFname)
+          fileRecord = models.DataFile.objects.get(filename__iexact= targetFname, fileType__iexact=ENTRY_TYPES[0])
+          if fileRecord:
+            return os.path.join(fileRecord.path, fileRecord.filename)
+          else:
+              logger.debug("Not found %s in DB", targetFname)
+              return None
+      except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+          logger.exception(exc)
+          # check from disk
+          logger.debug("Searching %s in Disk", targetFname)
+
+          for dirName in os.listdir(EMDB_DATA_DIR):
+            for fname in os.listdir(os.path.join(EMDB_DATA_DIR, dirName)):
+                if fname== targetFname:
+                    return os.path.join(EMDB_DATA_DIR, dirName, fname)
+      return None

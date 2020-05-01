@@ -14,10 +14,10 @@ router.register(r'datasets', views.DataSetViewSet)
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
     path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
-    path('lrs/<slug:query_id>/', views.EntryDetailView.as_view()),
+    path('lrs/<slug:query_id>/', views.EntryAnnFromMapsView.as_view()),
     re_path(r'^lrs/fakeLR/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
-    re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryAllAnnAlgorithm.as_view()),
-    re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$',views.ListModifiedPDB.as_view()),
+    re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryAllAnnFromMapView.as_view()),
+    re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.ListModifiedPDBView.as_view()),
     re_path(r'^files/modifiedPdb/download/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()),
     path('', include(router.urls)),
 ]
