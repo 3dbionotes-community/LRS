@@ -123,6 +123,7 @@ def update_DB_from_Disk():
         logger.exception(exc)
 
     entry_list+= updateDB_modifiedPdbs("isolde")
+    entry_list+= updateDB_modifiedPdbs("pdb-redo")
 
     return entry_list
 
@@ -282,12 +283,12 @@ class DownloadGenericFile(APIView):
 
     def get(self, request, file_uuid, format=None):
         """
+        downloads a generic file given its uuid
         """
         try:
             logger.debug("Trying to identify file %s" % str(file_uuid))
             fileRecord= models.DataFile.objects.get(unique_id=uuid.UUID(file_uuid))
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
-            print(exc)
             logger.debug("Error not found: %s" % file_uuid)
             return HttpResponseNotFound()
 
