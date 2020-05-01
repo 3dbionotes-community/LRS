@@ -171,7 +171,8 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
           for algoName in ANN_TYPES_DICT[algFamily]:
 
             try:
-
+              import time
+              print(time.time(), flush=True)
               fileRecords = models.DataFile.objects.get(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[0])
               for record in fileRecords:
                   print(record)
