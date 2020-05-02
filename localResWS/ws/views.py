@@ -248,7 +248,7 @@ class ListComputationalModelsView(APIView):
             data= pd.read_csv(fname)
             if filters is not None:
                 for filterId, filterValue in filters.items():
-                    data= data[data[filterId]== filterValue]
+                    data= data[data[filterId]== filterValue.upper()]
             if data.shape[0]>0:
                 if data.shape[0]==1:
                     return [data.to_dict(orient="records")]
