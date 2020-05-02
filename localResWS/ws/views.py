@@ -273,6 +273,7 @@ class ListComputationalModelsView(APIView):
                         filters = filters.update({"model_name": model_name})
 
                     dataJson= self._processFname(os.path.join(COMPUT_MODELS_DIR, modelType,fname), filters=filters)
+                    print(dataJson)
                     if dataJson is not None:
                         responseData+= dataJson
 
