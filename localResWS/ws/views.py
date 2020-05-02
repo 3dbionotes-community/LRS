@@ -171,7 +171,7 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
         for algFamily in ANN_TYPES_DICT:
           for algoName in ANN_TYPES_DICT[algFamily]:
             modifiedPdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
-            modifiedPdbFname= self._locateFname(modifiedPdbFname)
+            modifiedPdbFname= self._locateFname(modifiedPdbFname, modifiedPdbType=modified_pdb)
             if modifiedPdbFname is not None:
                 algoDataDict= self._getJsonFromFname(modifiedPdbFname, chain_id, minToFilter= ANN_TYPES_MIN_VAL[algFamily][algoName] )
                 if algoDataDict is not None:
