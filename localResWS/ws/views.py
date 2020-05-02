@@ -262,18 +262,18 @@ class ListComputationalModelsView(APIView):
         """
         Provide downloading links for modified pdbs
         """
+        print(uniprot_id, prot_name, model_name)
         responseData=[]
         for modelType in os.listdir(COMPUT_MODELS_DIR):
             if modelType==model_type:
                 for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, modelType)):
                     filters={"Uniprot_ID":uniprot_id}
                     if prot_name is not None:
-                        filters= filters.update({"Protein_ID":prot_name})
+                        filters.update({"Protein_ID":prot_name})
                     if model_name is not None:
-                        filters = filters.update({"model_name": model_name})
+                        filters.update({"model_name": model_name})
 
                     dataJson= self._processFname(os.path.join(COMPUT_MODELS_DIR, modelType,fname), filters=filters)
-                    print(dataJson)
                     if dataJson is not None:
                         responseData+= dataJson
 
