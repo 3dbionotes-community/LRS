@@ -6,7 +6,7 @@ from subprocess import check_output
 from django.core.exceptions import ValidationError
 
 from localResWS.ws import models
-from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR
+from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR, MODIFIED_PDBS_ANN_DIR
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
 import logging
 
@@ -67,6 +67,13 @@ def updateDB_modifiedPdbs(modelType):
                 data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0],
                                             entry=entry, fileType=FILE_TYPES[1], method=modelType)
                 data_file.save()
+            modifiedPdbsAnnDir= os.path.join(MODIFIED_PDBS_ANN_DIR, modelType, pdbId)
+            for fname in modifiedPdbsAnnDir:
+              __, modelType, annType, __, __ = fname.split(".")
+              data_file = models.DataFile(filename=fname, path=modifiedPdbsAnnDir,
+                                          entry=entry, fileType=FILE_TYPES[0], method=annType)
+              data_file.save()
+
             entry_list.append(entry)
 
     return entry_list
@@ -95,11 +102,11 @@ def getEntryAnnFromMapsFiles(entryId):
     except() as exc:
         logger.exception(exc)
 
-def updateDB_annoFromMaps():
+def updateDB_annoFromMaps(baseDir=EMDB_BASEDIR):
   logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
   reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
   entry_list = []
-  path = os.path.join(LOCAL_DATA_DIR, EMDB_BASEDIR)
+  path = os.path.join(LOCAL_DATA_DIR, baseDir)
   try:
     dir_names = [f.name for f in os.scandir(path) if f.is_dir() and REGEX_EMDB_ID.match(f.name)]
     for dir_name in dir_names:
@@ -150,7 +157,8 @@ class PdbEntryAnnFromMapsUtils(object):
         return None
       return {"chain":chain_id, "data":residues, "minVal": min([val for val in values if val > minToFilter]), "maxVal": max(values) }
 
-    def _locateFname(self, targetFname):
+    def _locateFname(self, targetFname, modifiedPdbType=None):
+
       try:
           logger.debug("Searching %s in DB", targetFname)
           fileRecord = models.DataFile.objects.get(filename__iexact= targetFname, fileType__iexact=ENTRY_TYPES[0])
@@ -164,8 +172,13 @@ class PdbEntryAnnFromMapsUtils(object):
           # check from disk
           logger.debug("Searching %s in Disk", targetFname)
 
-          for dirName in os.listdir(EMDB_DATA_DIR):
-            for fname in os.listdir(os.path.join(EMDB_DATA_DIR, dirName)):
+          if modifiedPdbType is None:
+            rootDir= EMDB_DATA_DIR
+          else:
+            rootDir= os.path.join(MODIFIED_PDBS_ANN_DIR, modifiedPdbType)
+          print("using directory", rootDir)
+          for dirName in os.listdir(rootDir):
+            for fname in os.listdir(os.path.join(rootDir, dirName)):
                 if fname== targetFname:
-                    return os.path.join(EMDB_DATA_DIR, dirName, fname)
+                    return os.path.join(rootDir, dirName, fname)
       return None

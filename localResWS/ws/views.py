@@ -153,7 +153,7 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
     Retrieve an annotation entry `details`.
     """
 
-    def get(self, request, pdb_id, chain_id, format=None):
+    def get(self, request, pdb_id, chain_id, modified_pdb=None, format=None):
         """
         Get all map derived annotations related to one pdb_id, chain_id
         """
@@ -166,7 +166,8 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
 
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
         responseData=[]
-
+        if modified_pdb is not None:
+            pdb_id=pdb_id+"."+modified_pdb
         for algFamily in ANN_TYPES_DICT:
           for algoName in ANN_TYPES_DICT[algFamily]:
             modifiedPdbFname=  ANN_TYPES_DICT[algFamily][algoName]%{"pdb_id":pdb_id}
