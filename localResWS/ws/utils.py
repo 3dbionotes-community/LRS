@@ -178,7 +178,6 @@ class PdbEntryAnnFromMapsUtils(object):
             rootDir= EMDB_DATA_DIR
           else:
             rootDir= os.path.join(MODIFIED_PDBS_ANN_DIR, modifiedPdbType)
-          print("using directory", rootDir)
           for dirName in os.listdir(rootDir):
             for fname in os.listdir(os.path.join(rootDir, dirName)):
                 if fname== targetFname:

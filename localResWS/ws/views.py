@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from localResWS.ws import models, serializers
-from localResWS.ws.dataPaths import LOCAL_DATA_DIR
+from localResWS.ws.dataPaths import LOCAL_DATA_DIR, COMPUT_MODELS_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
 from localResWS.ws.utils import updateDB_modifiedPdbs, updateDB_annoFromMaps, getEntryAnnFromMapsFiles, \
     PdbEntryAnnFromMapsUtils
@@ -213,7 +213,6 @@ class DownloadGenericFile(APIView):
 
 class ListModifiedPDBView(APIView):
     """
-    Retrieve an annotation entry `details`.
     """
 
     def get(self, request, model_type, pdb_id, format=None):
@@ -237,6 +236,49 @@ class ListModifiedPDBView(APIView):
           logger.debug("Not found %s", pdb_id+"/"+model_type)
           return not_found_resp(pdb_id+"/"+model_type)
         return Response(responseData)
+
+
+class ListComputationalModelsView(APIView):
+    """
+    """
+
+    def _processFname(self, fname, filters=None):
+        if fname.endswith(".csv"):
+            import pandas as pd
+            data= pd.read_csv(fname)
+            if filters is not None:
+                for filterId, filterValue in filters.items():
+                    data= data[data[filterId]== filterValue]
+            if data.shape[0]>0:
+                if data.shape[0]==1:
+                    return [data.to_dict(orient="records")]
+                else:
+                    return data.to_dict(orient="records")
+            else:
+                return None
+        return None
+
+    def get(self, request, model_type, uniprot_id, prot_name=None, format=None):
+        """
+        Provide downloading links for modified pdbs
+        """
+        responseData=[]
+        for modelType in os.listdir(COMPUT_MODELS_DIR):
+            if modelType==model_type:
+                for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, modelType)):
+                    filters={"Uniprot_ID":uniprot_id}
+                    if prot_name is not None:
+                        filters= filters.update({"Protein_ID":prot_name})
+                    dataJson= self._processFname(os.path.join(COMPUT_MODELS_DIR, modelType,fname), filters=filters)
+                    if dataJson is not None:
+                        responseData+= dataJson
+
+        if len(responseData) == 0:
+            logger.debug("Not found %s", uniprot_id + "/" + model_type)
+            return not_found_resp(uniprot_id + "/" + model_type)
+        return Response(responseData)
+
+
 
 class EntryListUpdateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
