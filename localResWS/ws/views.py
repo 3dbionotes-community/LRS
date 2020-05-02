@@ -246,7 +246,7 @@ class ListComputationalModelsView(APIView):
         if fname.endswith(".csv"):
             import pandas as pd
             data= pd.read_csv(fname)
-            print(data)
+            # print(data)
             if filters is not None:
                 for filterId, filterValue in filters.items():
                     data= data[data[filterId]== filterValue]
@@ -264,7 +264,7 @@ class ListComputationalModelsView(APIView):
         """
         Provide downloading links for modified pdbs
         """
-        print(uniprot_id, prot_name, model_name)
+        # print(uniprot_id, prot_name, model_name)
         responseData=[]
         for modelType in os.listdir(COMPUT_MODELS_DIR):
             if modelType==model_type:
