@@ -246,6 +246,7 @@ class ListComputationalModelsView(APIView):
         if fname.endswith(".csv"):
             import pandas as pd
             data= pd.read_csv(fname)
+            print(data)
             if filters is not None:
                 for filterId, filterValue in filters.items():
                     data= data[data[filterId]== filterValue.upper()]
