@@ -249,7 +249,7 @@ class ListComputationalModelsView(APIView):
             print(data)
             if filters is not None:
                 for filterId, filterValue in filters.items():
-                    data= data[data[filterId]== filterValue.upper()]
+                    data= data[data[filterId]== filterValue]
                 print(data)
             if data.shape[0]>0:
                 if data.shape[0]==1:
@@ -269,9 +269,9 @@ class ListComputationalModelsView(APIView):
         for modelType in os.listdir(COMPUT_MODELS_DIR):
             if modelType==model_type:
                 for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, modelType)):
-                    filters={"Uniprot_ID":uniprot_id}
+                    filters={"Uniprot_ID":uniprot_id.upper()}
                     if prot_name is not None:
-                        filters.update({"Protein_ID":prot_name})
+                        filters.update({"Protein_ID":prot_name.upper()})
                     if model_name is not None:
                         filters.update({"model_name": model_name})
                     print(filters)
