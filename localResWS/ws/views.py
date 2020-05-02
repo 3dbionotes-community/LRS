@@ -249,6 +249,7 @@ class ListComputationalModelsView(APIView):
             if filters is not None:
                 for filterId, filterValue in filters.items():
                     data= data[data[filterId]== filterValue.upper()]
+                print(data)
             if data.shape[0]>0:
                 if data.shape[0]==1:
                     return [data.to_dict(orient="records")]
@@ -272,7 +273,7 @@ class ListComputationalModelsView(APIView):
                         filters.update({"Protein_ID":prot_name})
                     if model_name is not None:
                         filters.update({"model_name": model_name})
-
+                    print(filters)
                     dataJson= self._processFname(os.path.join(COMPUT_MODELS_DIR, modelType,fname), filters=filters)
                     if dataJson is not None:
                         responseData+= dataJson
