@@ -300,7 +300,7 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
         # print(uniprot_id, prot_name, model_name)
         responseData = []
         filters={}
-        if pdb_id is not None:
+        if pdb_id is not None or pdb_id=="any":
             filters = {"PDB_ID": pdb_id.upper()}
         if compound_id is not None:
             filters.update({"compoundCode": compound_id})
