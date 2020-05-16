@@ -13,7 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from localResWS.ws import models, serializers
-from localResWS.ws.dataPaths import LOCAL_DATA_DIR, COMPUT_MODELS_DIR
+from localResWS.ws.dataPaths import LOCAL_DATA_DIR, COMPUT_MODELS_DIR, \
+    MODEL_AND_LIGAND_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
 from localResWS.ws.utils import updateDB_modifiedPdbs, updateDB_annoFromMaps, getEntryAnnFromMapsFiles, \
     PdbEntryAnnFromMapsUtils
@@ -238,21 +239,18 @@ class ListModifiedPDBView(APIView):
         return Response(responseData)
 
 
-class ListComputationalModelsView(APIView):
-    """
-    """
-
+class ListModelsAbstract():
     def _processFname(self, fname, filters=None):
         if fname.endswith(".csv"):
             import pandas as pd
-            data= pd.read_csv(fname)
+            data = pd.read_csv(fname)
             # print(data)
             if filters is not None:
                 for filterId, filterValue in filters.items():
-                    data= data[data[filterId]== filterValue]
+                    data = data[data[filterId] == filterValue]
                 print(data)
-            if data.shape[0]>0:
-                if data.shape[0]==1:
+            if data.shape[0] > 0:
+                if data.shape[0] == 1:
                     return [data.to_dict(orient="records")]
                 else:
                     return data.to_dict(orient="records")
@@ -260,21 +258,26 @@ class ListComputationalModelsView(APIView):
                 return None
         return None
 
+class ListComputationalModelsView(APIView, ListModelsAbstract):
+    """
+    """
+
     def get(self, request, model_type, uniprot_id, prot_name=None, model_name=None, format=None):
         """
         Provide downloading links for modified pdbs
         """
         # print(uniprot_id, prot_name, model_name)
+
+        filters = {"Uniprot_ID": uniprot_id.upper()}
+        if prot_name is not None:
+            filters.update({"Protein_ID": prot_name.upper()})
+        if model_name is not None:
+            filters.update({"model_name": model_name})
+        print(filters)
         responseData=[]
         for modelType in os.listdir(COMPUT_MODELS_DIR):
             if modelType==model_type:
                 for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, modelType)):
-                    filters={"Uniprot_ID":uniprot_id.upper()}
-                    if prot_name is not None:
-                        filters.update({"Protein_ID":prot_name.upper()})
-                    if model_name is not None:
-                        filters.update({"model_name": model_name})
-                    print(filters)
                     dataJson= self._processFname(os.path.join(COMPUT_MODELS_DIR, modelType,fname), filters=filters)
                     if dataJson is not None:
                         responseData+= dataJson
@@ -285,6 +288,32 @@ class ListComputationalModelsView(APIView):
         return Response(responseData)
 
 
+class ListPdbAndLigandView(APIView, ListModelsAbstract):
+    """
+    """
+
+
+    def get(self, request, experiment_name, pdb_id, compound_id=None, format=None):
+        """
+        Provide downloading links for modified pdbs
+        """
+        # print(uniprot_id, prot_name, model_name)
+        responseData = []
+        filters = {"PDB_ID": pdb_id.upper()}
+        if compound_id is not None:
+            filters.update({"compoundCode": compound_id})
+        print(filters)
+        for experimentName in os.listdir(MODEL_AND_LIGAND_DIR):
+            if experimentName == experiment_name:
+                for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, experimentName)):
+                    dataJson = self._processFname(os.path.join(COMPUT_MODELS_DIR, experimentName, fname), filters=filters)
+                    if dataJson is not None:
+                        responseData += dataJson
+
+        if len(responseData) == 0:
+            logger.debug("Not found %s", experiment_name + "/" + pdb_id)
+            return not_found_resp(experiment_name + "/" + pdb_id)
+        return Response(responseData)
 
 class EntryListUpdateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
