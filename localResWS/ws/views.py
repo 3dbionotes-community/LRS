@@ -293,20 +293,22 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
     """
 
 
-    def get(self, request, experiment_name, pdb_id, compound_id=None, format=None):
+    def get(self, request, experiment_name, pdb_id=None, compound_id=None, format=None):
         """
         Provide downloading links for modified pdbs
         """
         # print(uniprot_id, prot_name, model_name)
         responseData = []
-        filters = {"PDB_ID": pdb_id.upper()}
+        filters={}
+        if pdb_id is not None:
+            filters = {"PDB_ID": pdb_id.upper()}
         if compound_id is not None:
             filters.update({"compoundCode": compound_id})
         print(filters)
         for experimentName in os.listdir(MODEL_AND_LIGAND_DIR):
             if experimentName == experiment_name:
-                for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, experimentName)):
-                    dataJson = self._processFname(os.path.join(COMPUT_MODELS_DIR, experimentName, fname), filters=filters)
+                for fname in os.listdir(os.path.join(MODEL_AND_LIGAND_DIR, experimentName)):
+                    dataJson = self._processFname(os.path.join(MODEL_AND_LIGAND_DIR, experimentName, fname), filters=filters)
                     if dataJson is not None:
                         responseData += dataJson
 
