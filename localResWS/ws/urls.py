@@ -13,10 +13,13 @@ router.register(r'datasets', views.DataSetViewSet)
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
-    path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
-    path('lrs/<slug:query_id>/', views.EntryAnnFromMapsView.as_view()),
-    re_path(r'^lrs/fakeLR/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
-    re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/?(?P<modified_model>(pdb-redo|isolde))?/$', views.PdbEntryAllAnnFromMapView.as_view()),
+#     path('lrs/update/', views.EntryListUpdateView.as_view(), name='db-update'),
+    path('update/', views.EntryListUpdateView.as_view(), name='db-update'),
+#     path('lrs/<slug:query_id>/', views.EntryAnnFromMapsView.as_view()),
+    path('<slug:query_id>/', views.EntryAnnFromMapsView.as_view()),
+#     re_path(r'^lrs/fakeLR/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/$', views.PdbEntryFakeView.as_view()),
+#     re_path(r'^lrs/pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/?(?P<modified_model>(pdb-redo|isolde))?/$', views.PdbEntryAllAnnFromMapView.as_view()),
+    re_path(r'^pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/?(?P<modified_model>(pdb-redo|isolde))?/$', views.PdbEntryAllAnnFromMapView.as_view()),    
     re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.ListModifiedPDBView.as_view()),
     re_path(r'^files/modifiedPdb/download/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()), #TODO: make more specific downloads. E.g isolde pdb=?. Do not change after bionotes change
     re_path(r'^files/genericDownload/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()),
