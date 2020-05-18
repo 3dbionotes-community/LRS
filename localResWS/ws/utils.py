@@ -101,10 +101,11 @@ def updateDB_modelAndLigand(experimentName):
       entry = models.Entry(entryId=pdbId, path=entryPath, entryType=ENTRY_TYPES[3])
       entry.save()
       # find files inside
-      for filename in os.listdir(os.path.join(entryPath, pdbId)):
+      dirName= os.path.join(entryPath, pdbId)
+      for filename in os.listdir(dirName):
         if filename.endswith(".pdb"):
           logger.debug('Creating new dataFile %s record', filename)
-          data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0],
+          data_file = models.DataFile(filename=os.path.basename(filename), path=dirName,
                                       entry=entry, fileType=FILE_TYPES[3], method=experimentName)
           data_file.save()
 
