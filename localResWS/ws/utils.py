@@ -71,8 +71,8 @@ def updateDB_modifiedPdbs(modelType):
             modifiedPdbsAnnDir= os.path.join(MODIFIED_PDBS_ANN_DIR, modelType, pdbId)
             # print(modifiedPdbsAnnDir)
             for fname in os.listdir(modifiedPdbsAnnDir):
-              # print(fname)
-              __, modelType, annType, __, __ = fname.split(".")
+              print(fname)
+              __, modelType_, annType, __, __ = fname.split(".")
               data_file = models.DataFile(filename=fname, path=modifiedPdbsAnnDir,
                                           entry=entry, fileType=FILE_TYPES[0], method=annType)
               data_file.save()
