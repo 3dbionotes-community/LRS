@@ -344,10 +344,11 @@ class DownloadModelAndLigand(APIView, ListModelsAbstract):
     """
 
     def get(self, request, experiment_name, pdb_id, compound_id, pocket_id, format=None):
-
+        pdb_id= pdb_id.upper()
         if experiment_name=="covid19_COSS":
             filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
             fullName= os.path.join( MODEL_AND_LIGAND_DIR, experiment_name, filename)
+            print("fullName", fullName)
             if os.path.isfile(fullName):
                 with open(fullName, "rb") as fileObj:
                     response = HttpResponse(FileWrapper(fileObj),
