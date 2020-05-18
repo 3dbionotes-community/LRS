@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, '.env'))
-load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -43,7 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'localResWS.ws'
+    'localResWS.ws',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +89,16 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'HOST': os.environ['MYSQL_HOST'],
+#         'PORT': int(os.environ['MYSQL_PORT']),
+#         'NAME': os.environ['MYSQL_DATABASE'],
+#         'USER': os.environ['MYSQL_USER'],
+#         'PASSWORD': os.environ['MYSQL_PASSWORD'],
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -144,6 +152,9 @@ LOGGING = {
         },
     },
     'loggers': {
+        'django.utils.autoreload': {
+          'level': 'INFO',
+        },
         'django': {
             'handlers': ['file'],
             'level': 'DEBUG',
@@ -154,10 +165,38 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        
     },
 }
 
 REST_FRAMEWORK = {
     'DEFAULT_VERSION': '0.1.0',
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning'
+    # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
+
+# If you're behind a proxy, use the X-Forwarded-Host header
+# See https://docs.djangoproject.com/en/1.8/ref/settings/#use-x-forwarded-host
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
+# And if your proxy does your SSL encoding for you, set SECURE_PROXY_SSL_HEADER
+# https://docs.djangoproject.com/en/1.8/ref/settings/#secure-proxy-ssl-header
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_SCHEME', 'https')
+
+# Other security settings
+# SECURE_SSL_REDIRECT = True
+# If you set SECURE_SSL_REDIRECT to True, make sure the SECURE_REDIRECT_EXEMPT
+# contains at least this line:
+# SECURE_REDIRECT_EXEMPT = [
+#     "archives/api/mailman/.*",  # Request from Mailman.
+#     ]
+# SESSION_COOKIE_SECURE = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURE_BROWSER_XSS_FILTER = True
+# CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_HTTPONLY = True
+# X_FRAME_OPTIONS = 'DENY'
+

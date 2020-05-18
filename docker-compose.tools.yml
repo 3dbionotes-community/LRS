@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+# Scipion / XMIPP tools
+  tools:
+    image: bcu/lrs_tools
+    build:
+      context: ./lrs_tools
+      args:
+        USER_NAME: ${USER_NAME}
+        USER_PASSWD: ${USER_PASSWD}
+        USER_UID: ${USER_UID}
+        USER_GID: ${USER_UID}
+    stdin_open: true
+    tty: true
+    ports:
+      - "2283:22"
+    volumes:
+      - ./service/tools:/home/${USER_NAME}/lrs/tools
+      - ./service/data:/home/${USER_NAME}/lrs/data

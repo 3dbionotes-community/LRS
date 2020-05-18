@@ -6,6 +6,7 @@ LABEL maintainer="jr.macias@cnb.csic.es"
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     sudo nano git curl bzip2 ca-certificates \
+    python-mysqldb \
     python3-dev \
     2>&1 \
     && apt-get autoremove -y \
