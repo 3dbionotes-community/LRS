@@ -90,6 +90,7 @@ def updateDB_modelAndLigand(experimentName):
     fnames = [ fname for fname in os.listdir(entryPath) if os.path.isdir(fname)]
   else:
     logger.debug('Error, experimentName %s not understood', experimentName)
+    print('Error, experimentName %s not understood', experimentName)
     return []
 
   print("fnames", fnames)
