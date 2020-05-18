@@ -309,7 +309,7 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
                                                          fileType__iexact=FILE_TYPES[3], method=experiment_name)
                     responseData = {}
                     for record in fileRecords:
-                        responseData["URL"] =  "files/genericDownload/download/%s" % record.unique_id
+                        responseData["URL"] =  "files/genericDownload/%s" % record.unique_id
                         responseData["PDB_ID"] = pdb_id
                         responseData["compoundCode"] = compound_id
                         responseData["Pocket"]=pocket_id
@@ -337,6 +337,26 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
             logger.debug("Not found %s", experiment_name + "/" + pdb_id)
             return not_found_resp(experiment_name + "/" + pdb_id)
         return Response(responseData)
+
+
+class DownloadModelAndLigand(APIView, ListModelsAbstract):
+    """
+    """
+
+    def get(self, request, experiment_name, pdb_id, compound_id, pocket_id, format=None):
+
+        if experiment_name=="covid19_COSS":
+            filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
+            fullName= os.path.join( MODEL_AND_LIGAND_DIR, experiment_name, filename)
+            if os.path.isfile(fullName):
+                with open(fullName, "rb") as fileObj:
+                    response = HttpResponse(FileWrapper(fileObj),
+                                            content_type='application/x-gzip')
+                    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+                    return response
+        return not_found_resp(experiment_name+"/"+str(pdb_id))
+
+
 
 class EntryListUpdateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
