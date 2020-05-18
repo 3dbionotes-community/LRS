@@ -69,13 +69,13 @@ def updateDB_modifiedPdbs(modelType):
                                             entry=entry, fileType=FILE_TYPES[1], method=modelType)
                 data_file.save()
             modifiedPdbsAnnDir= os.path.join(MODIFIED_PDBS_ANN_DIR, modelType, pdbId)
-            # print(modifiedPdbsAnnDir)
-            for fname in os.listdir(modifiedPdbsAnnDir):
-              print(fname)
-              __, modelType_, annType, __, __ = fname.split(".")
-              data_file = models.DataFile(filename=fname, path=modifiedPdbsAnnDir,
-                                          entry=entry, fileType=FILE_TYPES[0], method=annType)
-              data_file.save()
+            if os.path.isdir(modifiedPdbsAnnDir):
+              for fname in os.listdir(modifiedPdbsAnnDir):
+                print(fname)
+                __, modelType_, annType, __, __ = fname.split(".")
+                data_file = models.DataFile(filename=fname, path=modifiedPdbsAnnDir,
+                                            entry=entry, fileType=FILE_TYPES[0], method=annType)
+                data_file.save()
 
             entry_list.append(entry)
 
