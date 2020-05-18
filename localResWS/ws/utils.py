@@ -88,7 +88,7 @@ def updateDB_modelAndLigand(experimentName):
   if experimentName == "covid19_COSS":
     entryPath = os.path.join(MODEL_AND_LIGAND_DIR, experimentName)
     print(entryPath)
-    fnames = [ fname for fname in os.listdir(entryPath) if os.path.isdir(fname)]
+    fnames = [ fname for fname in os.listdir(entryPath) if os.path.isdir(os.path.join(entryPath,fname))]
   else:
     # logger.debug('Error, experimentName %s not understood', experimentName)
     print('Error, experimentName %s not understood', experimentName)
