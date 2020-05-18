@@ -17,7 +17,7 @@ from localResWS.ws.dataPaths import LOCAL_DATA_DIR, COMPUT_MODELS_DIR, \
     MODEL_AND_LIGAND_DIR
 from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
 from localResWS.ws.utils import updateDB_modifiedPdbs, updateDB_annoFromMaps, getEntryAnnFromMapsFiles, \
-    PdbEntryAnnFromMapsUtils
+    PdbEntryAnnFromMapsUtils, updateDB_modelAndLigand
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +96,7 @@ def update_DB_from_Disk():
     entry_list+=updateDB_annoFromMaps()
     entry_list+= updateDB_modifiedPdbs("isolde")
     entry_list+= updateDB_modifiedPdbs("pdb-redo")
+    entry_list+= updateDB_modelAndLigand("covid19_COSS")
 
     return entry_list
 
@@ -248,7 +249,6 @@ class ListModelsAbstract():
             if filters is not None:
                 for filterId, filterValue in filters.items():
                     data = data[data[filterId] == filterValue]
-                print(data)
             if data.shape[0] > 0:
                 if data.shape[0] == 1:
                     return [data.to_dict(orient="records")]

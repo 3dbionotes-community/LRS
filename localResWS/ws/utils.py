@@ -6,7 +6,8 @@ from subprocess import check_output
 from django.core.exceptions import ValidationError
 
 from localResWS.ws import models
-from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR, MODIFIED_PDBS_ANN_DIR
+from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR, MODIFIED_PDBS_ANN_DIR, \
+  MODEL_AND_LIGAND_DIR
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
 import logging
 
@@ -69,7 +70,7 @@ def updateDB_modifiedPdbs(modelType):
                 data_file.save()
             modifiedPdbsAnnDir= os.path.join(MODIFIED_PDBS_ANN_DIR, modelType, pdbId)
             # print(modifiedPdbsAnnDir)
-            for fname in modifiedPdbsAnnDir:
+            for fname in os.listdir(modifiedPdbsAnnDir):
               # print(fname)
               __, modelType, annType, __, __ = fname.split(".")
               data_file = models.DataFile(filename=fname, path=modifiedPdbsAnnDir,
@@ -79,6 +80,35 @@ def updateDB_modifiedPdbs(modelType):
             entry_list.append(entry)
 
     return entry_list
+
+
+def updateDB_modelAndLigand(experimentName):
+  entry_list = []
+  if experimentName == "covid19_COSS":
+    entryPath = os.path.join(MODEL_AND_LIGAND_DIR, experimentName)
+    fnames = [ fname for fname in os.listdir(entryPath) if os.path.isdir(fname)]
+  else:
+    logger.debug('Error, experimentName %s not understood', experimentName)
+    return []
+
+
+  for pdbId in fnames:
+    try:
+      models.Entry.objects.get(entryId__iexact=pdbId, entryType__iexact=ENTRY_TYPES[3])
+    except (models.Entry.DoesNotExist) as exc:
+      logger.debug('Creating new ligand entry: %s', pdbId+"_"+ENTRY_TYPES[3])
+      entry = models.Entry(entryId=pdbId, path=entryPath, entryType=ENTRY_TYPES[3])
+      entry.save()
+      # find files inside
+      for filename in os.listdir(os.path.join(entryPath, pdbId)):
+        logger.debug('Creating new dataFile %s record', filename)
+        data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0],
+                                    entry=entry, fileType=FILE_TYPES[1], method=experimentName)
+        data_file.save()
+
+      entry_list.append(entry)
+
+  return entry_list
 
 
 

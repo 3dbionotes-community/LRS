@@ -2,8 +2,8 @@ import uuid
 
 from django.db import models
 
-ENTRY_TYPES=["emdb", "pdbRemodel", "computationalModel"]
-FILE_TYPES=["PDB_ANN_FROM_MAP", "ISOLDE", "COMPUTATIONAL_MODEL"]
+ENTRY_TYPES=["emdb", "pdbRemodel", "computationalModel", "modelAndLigand"]
+FILE_TYPES=["PDB_ANN_FROM_MAP", "ISOLDE", "COMPUTATIONAL_MODEL", "PDB_LIGAND_POCKET"]
 
 class AnnCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
