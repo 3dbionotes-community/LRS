@@ -20,7 +20,7 @@ urlpatterns = [
     re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.ListModifiedPDBView.as_view()),
     re_path(r'^files/modifiedPdb/download/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()), #TODO: make more specific downloads. E.g isolde pdb=?. Do not change after bionotes change
     re_path(r'^files/genericDownload/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()),
-    re_path(r'^files/downloadModelAndLigand/(?P<experiment_name>(covid19_COSS))/(?P<pdb_id>(\d\w{3}|any))/'
+    re_path(r'^files/downloadModelAndLigand/(?P<experiment_name>(covid19_COSS))/(?P<pdb_id>(\d\w{3}))/'
             r'(?P<compound_id>\w{3,30})/(?P<pocket_id>\w{1,24})/$', views.DownloadModelAndLigand.as_view()),
 
     re_path(r'^files/computModels/list/(?P<model_type>(SWISS-MODEL|BSM-Arc|AlphaFold))/?(?P<uniprot_id>\w{4,12})/?(?P<prot_name>\w{3,12})?/?(?P<model_name>\w{3,20})?/$', views.ListComputationalModelsView.as_view()),
