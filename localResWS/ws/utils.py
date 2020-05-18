@@ -83,6 +83,7 @@ def updateDB_modifiedPdbs(modelType):
 
 
 def updateDB_modelAndLigand(experimentName):
+  print("updateDB_modelAndLigand")
   entry_list = []
   if experimentName == "covid19_COSS":
     entryPath = os.path.join(MODEL_AND_LIGAND_DIR, experimentName)
@@ -91,7 +92,7 @@ def updateDB_modelAndLigand(experimentName):
     logger.debug('Error, experimentName %s not understood', experimentName)
     return []
 
-
+  print("fnames", fnames)
   for pdbId in fnames:
     print("Updating %s ?"%pdbId)
     try:
