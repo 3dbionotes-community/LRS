@@ -273,7 +273,7 @@ class ListComputationalModelsView(APIView, ListModelsAbstract):
             filters.update({"Protein_ID": prot_name.upper()})
         if model_name is not None:
             filters.update({"model_name": model_name})
-        print(filters)
+        print("Filters:", filters)
         responseData=[]
         for modelType in os.listdir(COMPUT_MODELS_DIR):
             if modelType==model_type:
@@ -304,7 +304,7 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
             filters = {"PDB_ID": pdb_id.upper()}
         if compound_id is not None:
             filters.update({"compoundCode": compound_id})
-        print(filters)
+        print("Filters:", filters)
         for experimentName in os.listdir(MODEL_AND_LIGAND_DIR):
             if experimentName == experiment_name:
                 for fname in os.listdir(os.path.join(MODEL_AND_LIGAND_DIR, experimentName)):

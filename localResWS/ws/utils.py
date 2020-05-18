@@ -93,6 +93,7 @@ def updateDB_modelAndLigand(experimentName):
 
 
   for pdbId in fnames:
+    print("Updating %s ?"%pdbId)
     try:
       models.Entry.objects.get(entryId__iexact=pdbId, entryType__iexact=ENTRY_TYPES[3])
     except (models.Entry.DoesNotExist) as exc:
@@ -101,10 +102,11 @@ def updateDB_modelAndLigand(experimentName):
       entry.save()
       # find files inside
       for filename in os.listdir(os.path.join(entryPath, pdbId)):
-        logger.debug('Creating new dataFile %s record', filename)
-        data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0],
-                                    entry=entry, fileType=FILE_TYPES[1], method=experimentName)
-        data_file.save()
+        if filename.endswith(".pdb"):
+          logger.debug('Creating new dataFile %s record', filename)
+          data_file = models.DataFile(filename=os.path.basename(filename), path=os.path.split(filename)[0],
+                                      entry=entry, fileType=FILE_TYPES[1], method=experimentName)
+          data_file.save()
 
       entry_list.append(entry)
 
