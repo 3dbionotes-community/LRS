@@ -93,7 +93,7 @@ def updateDB_modelAndLigand(experimentName):
     return []
 
   for pdbId in fnames:
-    print("Updating %s ?"%pdbId)
+    print("Updating ligands for %s ?"%pdbId)
     try:
       models.Entry.objects.get(entryId__iexact=pdbId, entryType__iexact=ENTRY_TYPES[3])
     except (models.Entry.DoesNotExist) as exc:
@@ -111,7 +111,6 @@ def updateDB_modelAndLigand(experimentName):
       entry_list.append(entry)
 
   return entry_list
-
 
 
 

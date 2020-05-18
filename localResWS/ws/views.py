@@ -90,13 +90,14 @@ def bad_entry_request(query_id):
                 "detail": "entryId _strictly_ must be in the form `emd-#####`" }
     return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-def update_DB_from_Disk():
+def update_DB_from_Disk(): #TODO: launnch a thread so that you dont get timeout
     logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
     entry_list=[]
     entry_list+=updateDB_annoFromMaps()
     entry_list+= updateDB_modifiedPdbs("isolde")
     entry_list+= updateDB_modifiedPdbs("pdb-redo")
     entry_list+= updateDB_modelAndLigand("covid19_COSS")
+    print("Database updated")
 
     return entry_list
 
@@ -227,7 +228,7 @@ class ListModifiedPDBView(APIView):
                                                      fileType__iexact=FILE_TYPES[1], method=model_type)
         except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
             #TODO: try to find files locally using findPdbRedo / findIsolde and create the database entry before error.
-            return not_found_resp(model_type+"/"+model_type)
+            return not_found_resp(model_type+"/"+pdb_id)
 
         logger.debug(fileRecords)
         responseData={}
@@ -293,12 +294,31 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
     """
 
 
-    def get(self, request, experiment_name, pdb_id=None, compound_id=None, format=None):
+    def get(self, request, experiment_name, pdb_id=None, compound_id=None, pocket_id=None, format=None):
         """
         Provide downloading links for modified pdbs
         """
         # print(uniprot_id, prot_name, model_name)
         responseData = []
+        if pocket_id is not None and pdb_id!="any": #Fast access
+            try:
+                if experiment_name=="covid19_COSS":
+                    filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
+                    fileRecords = models.DataFile.objects.filter(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[3], filename__iexact=filename,
+                                                         fileType__iexact=FILE_TYPES[3], method=experiment_name)
+                    responseData = {}
+                    for record in fileRecords:
+                        responseData["URL"] =  "files/genericDownload/download/%s" % record.unique_id
+                        responseData["PDB_ID"] = pdb_id
+                        responseData["compoundCode"] = compound_id
+                        responseData["Pocket"]=pocket_id
+                        responseData["LibraryName"]="ZINC"
+                    if len(responseData) >0:
+                        return Response( [responseData] )
+
+            except (ValueError, ValidationError, models.DataFile.DoesNotExist) as exc:
+                return not_found_resp(experiment_name+"/"+str(pdb_id))
+        #else
         filters={}
         if pdb_id is not None and pdb_id!="any":
             filters = {"PDB_ID": pdb_id.upper()}
