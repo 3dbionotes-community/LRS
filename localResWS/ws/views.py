@@ -206,7 +206,8 @@ class DownloadGenericFile(APIView):
             return HttpResponseNotFound()
 
         fullName= os.path.join(fileRecord.path, fileRecord.filename)
-        logger.debug("Trying to download %s"%fullName)
+        # logger.debug("Trying to download %s"%fullName)
+        print("Trying to download %s"%fullName)
         with open(fullName, "rb") as fileObj:
             response = HttpResponse(FileWrapper(fileObj),
                                     content_type='application/x-gzip')
