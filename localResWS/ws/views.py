@@ -331,7 +331,10 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
                 for fname in os.listdir(os.path.join(MODEL_AND_LIGAND_DIR, experimentName)):
                     dataJson = self._processFname(os.path.join(MODEL_AND_LIGAND_DIR, experimentName, fname), filters=filters)
                     if dataJson is not None:
-                        responseData += dataJson
+                        if isinstance(dataJson, list):
+                            responseData += dataJson
+                        else:
+                            responseData.append( dataJson )
 
         if len(responseData) == 0:
             logger.debug("Not found %s", experiment_name + "/" + pdb_id)
