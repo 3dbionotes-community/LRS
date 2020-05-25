@@ -1,21 +1,7 @@
 version: '3'
 
 services:
-  # App container for development
-  ws:
-    image: bcu/lrs_ws
-    build:
-      context: ./app
-      args:
-        USER_NAME: ${USER_NAME}
-        USER_PASSWD: ${USER_PASSWD}
-        USER_UID: ${USER_UID}
-        USER_GID: ${USER_UID}
-    volumes:
-      - ./app:/home/${USER_NAME}/lrs/app
-    user: ${USER_NAME}
-    entrypoint: python manage.py runserver 0.0.0.0:8000
-
+  # Container for Scipion-XMIPP
   tools:
     image: bcu/lrs_tools
     build:
@@ -28,37 +14,7 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "2283:22"
+      - ${SSH_EXT_PORT}:22
     volumes:
       - ./service/tools:/home/${USER_NAME}/lrs/tools
       - ./service/data:/home/${USER_NAME}/lrs/data
-
-
-  # MySQL BBDD
-  db:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-# NGINX proxy
-  proxy:
-    image: bcu/nginx:1.17-alpine
-    build: nginx
-    restart: always
-    ports:
-      - "${APP_EXT_PORT}:8000"
-    volumes:
-      - ./nginx/:/etc/nginx/conf.d/:ro
-      - ./app/static:/static
-    depends_on:
-      - ws
-
-volumes:
-  mysql_data:
