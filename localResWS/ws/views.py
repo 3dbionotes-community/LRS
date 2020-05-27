@@ -27,8 +27,9 @@ REGEX_PDB_ID = re.compile('^\d\w{3}$')
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
 MAPQ_FNAME_TEMPLATE="%(pdb_id)s.mapq.aa.pdb"
-ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}, "modelQuality":{"mapq":MAPQ_FNAME_TEMPLATE}}
-ANN_TYPES_MIN_VAL={"localResolution":{"deepres":1.5, "monores":1.5}, "modelQuality":{"mapq":-1}}
+FSCQ_TEMPLATE= "%(pdb_id)s.fscq.aa.pdb"
+ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}, "modelQuality":{"mapq":MAPQ_FNAME_TEMPLATE, "fscq":FSCQ_TEMPLATE}}
+ANN_TYPES_MIN_VAL={"localResolution":{"deepres":1.5, "monores":1.5}, "modelQuality":{"mapq":-1, "fscq":-3}}
 
 
 
@@ -149,6 +150,63 @@ class PdbEntryFakeView(APIView):
         import random
         fakeJson=[ {"chain":chain_id, "data": [ {"begin":str(i), "value":2+5*random.random()} for i in range(1,250) ] }]
         return Response(fakeJson)
+
+
+
+class VariantsAnnotationsView(APIView):
+    """
+    Mockup for variants annotations
+    """
+    def get(self, request, uniprot_id, format=None):
+        """
+        Get mockup data json
+        """
+        import random
+        j_annot=[{"track_name": "Genomic_Variants_CNCB",
+                    "visualization_type": "variants",
+                    "reference": "https://bigd.big.ac.cn/ncov/variation/annotation",
+                    "fav_icon": "https://bigd.big.ac.cn:443/favicon.ico",
+                    "acc": "P0DTD1",
+                    "data": [
+                        {"mutationType": "SNP",
+                        "mutationEffect": "start_lost",
+                        "begin": 1,
+                        "end": 1,
+                        "wildtype": "M",
+                        "variation": "L",
+                        "numberOfViruses": 2,
+                        "reportedProtChange": "QHD43415.1:p.1M>L",
+                        "genomicPosition": 266,
+                        "originalGenomic": "A",
+                        "newGenomic": ">T",
+                        "evidenceLevel": "III"},
+                        {"mutationType": "SNP",
+                        "mutationEffect": "missense_variant",
+                        "begin": 2,
+                        "end": 2,
+                        "wildtype": "E",
+                        "variation": "G",
+                        "numberOfViruses": 1,
+                        "reportedProtChange": "QHD43415.1:p.2E>G",
+                        "genomicPosition": 270,
+                        "originalGenomic": "A",
+                        "newGenomic": ">G",
+                        "evidenceLevel": "III"},
+                        {"mutationType": "SNP",
+                        "mutationEffect": "missense_variant",
+                        "begin": 3,
+                        "end": 3,
+                        "wildtype": "S",
+                        "variation": "R",
+                        "numberOfViruses": 3,
+                        "reportedProtChange": "QHD43415.1:p.3S>R",
+                        "genomicPosition": 274,
+                        "originalGenomic": "C",
+                        "newGenomic": ">A",
+                        "evidenceLevel": "III"}]}]
+        return Response(j_annot)
+
+
 
 
 class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
