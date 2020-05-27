@@ -19,7 +19,7 @@ REGEX_EMDB_ID = re.compile('^emd-\d{4,5}$')
 REGEX_VOL_FILE = re.compile('^(emd)-\d{4,5}\.map$')
 REGEX_PDB_FILE = re.compile('^(pdb)\d\w{3}\.ent$')
 REGEX_LR_FILE = re.compile('^\d\w{3}\.(deepres|monores)\.pdb$')
-REGEX_MAPQ_FILE = re.compile('^\d\w{3}\.(mapq)\.pdb$')
+REGEX_MAP2MODELQUALITY_FILE = re.compile('^\d\w{3}\.(mapq|fscq)\.pdb$')
 
 
 def findGeneric(pattern, dirToLook=THORN_DATA_DIR):
@@ -118,7 +118,7 @@ def updateDB_modelAndLigand(experimentName):
 def getEntryAnnFromMapsFiles(entryId):
     logger.debug("Get entry files for %s", entryId)
     path = os.path.join(LOCAL_DATA_DIR, entryId)
-    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
+    reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAP2MODELQUALITY_FILE]
     try:
         dir_list = os.listdir(path)
         # new entry
@@ -138,7 +138,7 @@ def getEntryAnnFromMapsFiles(entryId):
 
 def updateDB_annoFromMaps(baseDir=EMDB_BASEDIR):
   logger.debug("Update DB from data folder: %s", LOCAL_DATA_DIR)
-  reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAPQ_FILE]
+  reg_expressions = [REGEX_VOL_FILE, REGEX_PDB_FILE, REGEX_LR_FILE, REGEX_MAP2MODELQUALITY_FILE]
   entry_list = []
   path = os.path.join(LOCAL_DATA_DIR, baseDir)
   try:
