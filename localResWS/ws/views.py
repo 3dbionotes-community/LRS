@@ -27,8 +27,9 @@ REGEX_PDB_ID = re.compile('^\d\w{3}$')
 DEEP_RES_FNAME_TEMPLATE="%(pdb_id)s.deepres.aa.pdb"
 MONORES_FNAME_TEMPLATE="%(pdb_id)s.monores.aa.pdb"
 MAPQ_FNAME_TEMPLATE="%(pdb_id)s.mapq.aa.pdb"
-ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}, "modelQuality":{"mapq":MAPQ_FNAME_TEMPLATE}}
-ANN_TYPES_MIN_VAL={"localResolution":{"deepres":1.5, "monores":1.5}, "modelQuality":{"mapq":-1}}
+FSCQ_TEMPLATE= "%(pdb_id)s.fscq.aa.pdb"
+ANN_TYPES_DICT={"localResolution":{"deepres":DEEP_RES_FNAME_TEMPLATE, "monores":MONORES_FNAME_TEMPLATE}, "modelQuality":{"mapq":MAPQ_FNAME_TEMPLATE, "fscq":FSCQ_TEMPLATE}}
+ANN_TYPES_MIN_VAL={"localResolution":{"deepres":1.5, "monores":1.5}, "modelQuality":{"mapq":-1, "fscq":-3}}
 
 
 
