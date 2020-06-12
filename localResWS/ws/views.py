@@ -5,19 +5,23 @@ import uuid
 from wsgiref.util import FileWrapper
 
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse
-from django.http import HttpResponseNotFound
-from rest_framework import (permissions,
-                            status, viewsets)
+from django.http import HttpResponse, HttpResponseNotFound
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django_filters import FilterSet, ModelChoiceFilter
+from django_filters import rest_framework as filters
 from localResWS.ws import models, serializers
-from localResWS.ws.dataPaths import LOCAL_DATA_DIR, COMPUT_MODELS_DIR, \
-    MODEL_AND_LIGAND_DIR
-from localResWS.ws.models import FILE_TYPES, ENTRY_TYPES
-from localResWS.ws.utils import updateDB_modifiedPdbs, updateDB_annoFromMaps, getEntryAnnFromMapsFiles, \
-    PdbEntryAnnFromMapsUtils, updateDB_modelAndLigand
+from localResWS.ws.dataPaths import (COMPUT_MODELS_DIR, LOCAL_DATA_DIR,
+                                     MODEL_AND_LIGAND_DIR)
+from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
+from localResWS.ws.utils import (PdbEntryAnnFromMapsUtils,
+                                 getEntryAnnFromMapsFiles,
+                                 updateDB_annoFromMaps,
+                                 updateDB_modelAndLigand,
+                                 updateDB_modifiedPdbs)
 
 logger = logging.getLogger(__name__)
 
@@ -459,11 +463,40 @@ class FeatureTracksViewSet(viewsets.ModelViewSet):
     queryset = models.FeatureTrack.objects.all()
     serializer_class = serializers.FeatureTrackSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    search_fields = ['uniprot_entry__accession', 'track_type__name', 'name']
+    ordering_fields = ['name', 'track_type__name', 'uniprot_entry__accession']
+    ordering = ['name', 'uniprot_entry__accession']
 
-class FeaturesDataViewSet(viewsets.ModelViewSet):
+class TrackDataViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.TrackData.objects.all()
     serializer_class = serializers.FeatureDataSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    search_fields = ['f_track__name', 'mutationType', 'mutationEffect']
+    ordering_fields = ['f_track', 'begin', 'end', 'mutationType', 'mutationEffect']
+    ordering = ['f_track']
+
+class FeatureTrackDetailView(generics.ListAPIView):
+    """
+    Detail View for a given FeatureTrack
+    """
+    serializer_class = serializers.FeatureTrackDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    lookup_url_kwarg = 'acc'
+
+    def get_queryset(self):
+        """
+        This view should return a FeatureTrack by UniProt and name
+         Example:
+            /featureTracks/<ACC>/<name>/
+            /featureTracks/P0DTC4/Genomic_Variants_CNCB/
+        """
+        uniprot_acc = self.kwargs['acc']
+        name = self.kwargs['name']
+        return models.FeatureTrack.objects.filter(
+            uniprot_entry__accession=uniprot_acc,
+            name=name)

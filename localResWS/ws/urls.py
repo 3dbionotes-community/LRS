@@ -14,7 +14,7 @@ router.register(r'datasets', views.DataSetViewSet)
 router.register(r'uniprotEntries', views.UniprotEntryViewSet)
 router.register(r'trackTypes', views.TrackTypeViewSet)
 router.register(r'featureTracks', views.FeatureTracksViewSet)
-router.register(r'featuresData', views.FeaturesDataViewSet)
+router.register(r'featuresData', views.TrackDataViewSet)
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
@@ -35,4 +35,6 @@ urlpatterns = [
     re_path(r'^files/computModels/list/(?P<model_type>(SWISS-MODEL|BSM-Arc|AlphaFold))/?(?P<uniprot_id>\w{4,12})/?(?P<prot_name>\w{3,12})?/?(?P<model_name>\w{3,20})?/$', views.ListComputationalModelsView.as_view()),
     re_path(r'^files/pdbAndLigand/list/(?P<experiment_name>(Diamond_mainProtease|covid19_COSS))/(?P<pdb_id>(\d\w{3}|any))?/'
             r'?(?P<compound_id>\w{3,30})?/?(?P<pocket_id>\w{1,24})?/?$', views.ListPdbAndLigandView.as_view()),
+
+    re_path('^featureTracks/(?P<acc>[^/.]+)/(?P<name>[^/.]+)/$', views.FeatureTrackDetailView.as_view()),
 ]

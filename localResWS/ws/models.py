@@ -74,20 +74,6 @@ class FeatureTrack(models.Model):
 
 
 class TrackData(models.Model):
-    # "mutationType": "SNP",
-    # "mutationEffect": "start_lost",
-    # "begin": 1,
-    # "end": 1,
-    # "wildtype": "M",
-    # "variation": "L",
-    # "numberOfViruses": 2,
-    # "reportedProtChange": "QHD43415.1:p.1M>L",
-    # "genomicPosition": 266,
-    # "originalGenomic": "A",
-    # "newGenomic": ">T",
-    # "evidenceLevel": "III",
-    # "xrefs": []
-
     f_track = models.ForeignKey(FeatureTrack, related_name='data', on_delete=models.CASCADE)
     mutationType = models.CharField(max_length=255, blank=True, null=True, default='')
     mutationEffect = models.CharField(max_length=255, blank=True, null=True, default='')
