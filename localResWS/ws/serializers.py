@@ -82,13 +82,20 @@ class FeatureDataSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class FeatureDataDetailSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField('get_type')
+    def get_type(self, obj):
+        return obj.f_track.track_type.name.upper()
 
     class Meta:
         model = models.TrackData
         fields = [
-            'mutationType', 'mutationEffect',
+            'type',
+            'mutationType',
+            'sourceType',
+            'alternativeSequence',
+            'mutationEffect',
             'begin', 'end',
-            'wildtype', 'variation',
+            'wildType', 'variation',
             'numberOfViruses',
             'reportedProtChange', 'genomicPosition', 'originalGenomic', 'newGenomic',
             'evidenceLevel']
@@ -101,11 +108,11 @@ class FeatureTrackSerializer(serializers.ModelSerializer):
         model = models.FeatureTrack
         fields = '__all__'
 
-class FeatureTrackDetailSerializer(serializers.ModelSerializer):
+class TrackDetailSerializer(serializers.ModelSerializer):
     track_name = serializers.SerializerMethodField('get_track_name')
-    acc = serializers.SerializerMethodField('get_acc')
-    visualization_type = serializers.SerializerMethodField('get_visualization_type')
-    data = FeatureDataDetailSerializer(many=True)
+    accession = serializers.SerializerMethodField('get_acc')
+    # visualization_type = serializers.SerializerMethodField('get_visualization_type')
+    features = FeatureDataDetailSerializer(many=True)
 
     def get_track_name(self, obj):
         return obj.name
@@ -113,9 +120,11 @@ class FeatureTrackDetailSerializer(serializers.ModelSerializer):
     def get_acc(self, obj):
         return obj.uniprot_entry.accession
 
-    def get_visualization_type(self, obj):
-        return obj.track_type.name
+    def get_features(self, obj):
+        return obj.data
 
     class Meta:
         model = models.FeatureTrack
-        fields = ['acc', 'visualization_type', 'track_name', 'reference', 'fav_icon', 'data']
+        fields = ['accession', 'track_name', 'reference', 'fav_icon',
+        'features'
+        ]

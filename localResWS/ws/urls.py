@@ -37,4 +37,5 @@ urlpatterns = [
             r'?(?P<compound_id>\w{3,30})?/?(?P<pocket_id>\w{1,24})?/?$', views.ListPdbAndLigandView.as_view()),
 
     re_path('^featureTracks/(?P<acc>[^/.]+)/(?P<name>[^/.]+)/$', views.FeatureTrackDetailView.as_view()),
+    re_path('^features/(?P<uniprot_entry>[^/.]+)/(?P<name>[^/.]+)/$', views.TrackDetailView.as_view()),
 ]

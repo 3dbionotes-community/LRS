@@ -6,7 +6,8 @@ from wsgiref.util import FileWrapper
 
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, HttpResponseNotFound
-from rest_framework import generics, permissions, status, viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, mixins, permissions, status, viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -423,7 +424,7 @@ class DownloadModelAndLigand(APIView, ListModelsAbstract):
         return not_found_resp(experiment_name+"/"+str(pdb_id))
 
 
-
+#  ######################################################################
 class EntryListUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -484,7 +485,7 @@ class FeatureTrackDetailView(generics.ListAPIView):
     """
     Detail View for a given FeatureTrack
     """
-    serializer_class = serializers.FeatureTrackDetailSerializer
+    serializer_class = serializers.TrackDetailSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_url_kwarg = 'acc'
 
@@ -500,3 +501,24 @@ class FeatureTrackDetailView(generics.ListAPIView):
         return models.FeatureTrack.objects.filter(
             uniprot_entry__accession=uniprot_acc,
             name=name)
+
+class TrackDetailView(generics.RetrieveAPIView):
+    """
+    Detail View for a given FeatureTrack
+    """
+    queryset = models.FeatureTrack.objects.all()
+    serializer_class = serializers.TrackDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    lookup_url_kwarg = 'name'
+    multiple_lookup_fields = ['uniprot_entry', 'name']
+    
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = {}
+        for field in self.multiple_lookup_fields:
+            filter[field] = self.kwargs[field]
+
+        obj = get_object_or_404(queryset, **filter)
+        self.check_object_permissions(self.request, obj)
+        return obj

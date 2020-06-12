@@ -46,8 +46,7 @@ class DataSet(models.Model):
     features = Feature()
 
 
-# ===============================================
-
+#  ######################################################################
 class UniprotEntry(models.Model):
     """
     UniprotEntry
@@ -74,12 +73,14 @@ class FeatureTrack(models.Model):
 
 
 class TrackData(models.Model):
-    f_track = models.ForeignKey(FeatureTrack, related_name='data', on_delete=models.CASCADE)
+    f_track = models.ForeignKey(FeatureTrack, related_name='features', on_delete=models.CASCADE)
     mutationType = models.CharField(max_length=255, blank=True, null=True, default='')
+    sourceType = models.CharField(max_length=255, blank=True, null=True, default='')
+    alternativeSequence = models.CharField(max_length=255, blank=True, null=True, default='')
     mutationEffect = models.CharField(max_length=255, blank=True, null=True, default='')
     begin = models.IntegerField()
     end = models.IntegerField()
-    wildtype = models.CharField(max_length=255, blank=True, null=True, default='')
+    wildType = models.CharField(max_length=255, blank=True, null=True, default='')
     variation = models.CharField(max_length=255, blank=True, null=True, default='')
     numberOfViruses = models.IntegerField()
     reportedProtChange = models.CharField(max_length=255, blank=True, null=True, default='')
