@@ -285,34 +285,36 @@ def _update_feature_track(uniprot_entry, track_type, track):
     print(uniprot_entry, track_type, track_name)
     try:
         # update or create FeatureTrack        
-        obj, created = models.FeatureTrack.objects.update_or_create(
+        feat_track, created = models.FeatureTrack.objects.update_or_create(
             uniprot_entry=uniprot_entry,
             name=track_name,
-            track_type = track_type,
+            track_type=track_type,
             defaults={
                 'reference': track["reference"] if "reference" in track else '',
                 'fav_icon': track["fav_icon"] if "fav_icon" in track else ''})
         if created:
-            logger.debug('Created new entry: %s', obj)
-            objs.append(obj)
+            logger.debug('Created new entry: %s', feat_track)
+            objs.append(feat_track)
 
-        # for elem in track['data']:
-        #     # "mutationType": "SNP",
-        #     # "mutationEffect": "start_lost",
-        #     # "begin": 1,
-        #     # "end": 1,
-        #     # "wildtype": "M",
-        #     # "variation": "L",
-        #     # "numberOfViruses": 2,
-        #     # "reportedProtChange": "QHD43415.1:p.1M>L",
-        #     # "genomicPosition": 266,
-        #     # "originalGenomic": "A",
-        #     # "newGenomic": ">T",
-        #     # "evidenceLevel": "III",
-        #     # "xrefs": [
-                
-        #     # update or create TrackData
-        #     pass
+        for elem in track['data']:
+            # update or create TrackData
+            track_data, created = models.TrackData.objects.update_or_create(
+                f_track=feat_track,
+                begin=elem["begin"] if "begin" in elem else 0,
+                end=elem["end"] if "end" in elem else 0,
+                mutationType=elem["mutationType"] if "mutationType" in elem else '',
+                mutationEffect=elem["mutationEffect"] if "mutationEffect" in elem else '',
+                defaults={
+                    'wildtype': elem["wildtype"] if "wildtype" in elem else '',
+                    'variation': elem["variation"] if "variation" in elem else '',
+                    'numberOfViruses': elem["numberOfViruses"] if "numberOfViruses" in elem else 0,
+                    'reportedProtChange': elem["reportedProtChange"] if "reportedProtChange" in elem else '',
+                    'genomicPosition': elem["genomicPosition"] if "genomicPosition" in elem else 0,
+                    'originalGenomic': elem["originalGenomic"] if "originalGenomic" in elem else '',
+                    'newGenomic': elem["newGenomic"] if "newGenomic" in elem else '',
+                    'evidenceLevel': elem["evidenceLevel"] if "evidenceLevel" in elem else ''})
+            if created:
+                logger.debug('Created new entry: %s', track_data)
 
     except() as exc:
         logger.exception(exc)
