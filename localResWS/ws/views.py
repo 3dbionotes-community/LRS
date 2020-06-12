@@ -432,3 +432,38 @@ class EntryListUpdateView(APIView):
             return Response({ "request": "DB update","detail": "Got some new entries: "+str(len(entry_list))}, status=status.HTTP_201_CREATED)
         else:
             return Response({"request": "DB update","detail":"No new entries found."}, status=status.HTTP_204_NO_CONTENT)
+
+
+class UniprotEntryViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list` and `detail` actions.
+    """
+    queryset = models.UniprotEntry.objects.all()
+    serializer_class = serializers.UniprotEntrySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class TrackTypeViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list` and `detail` actions.
+    """
+    queryset = models.TrackType.objects.all()
+    serializer_class = serializers.TrackTypeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class FeatureTracksViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list` and `detail` actions.
+    """
+    queryset = models.FeatureTrack.objects.all()
+    serializer_class = serializers.FeatureTrackSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class FeaturesDataViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list` and `detail` actions.
+    """
+    queryset = models.TrackData.objects.all()
+    serializer_class = serializers.FeatureDataSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]

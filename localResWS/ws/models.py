@@ -44,3 +44,60 @@ class Feature(models.Model):
 class DataSet(models.Model):
     file = models.ForeignKey(Entry, related_name='data', on_delete=models.CASCADE)
     features = Feature()
+
+
+# ===============================================
+
+class UniprotEntry(models.Model):
+    """
+    UniprotEntry
+    """
+    accession = models.CharField(max_length=30, blank=False, primary_key=True)
+    name = models.CharField(max_length=255, blank=True, null=True, default='')
+    description = models.CharField(max_length=255, blank=True, null=True, default='')
+
+
+class TrackType(models.Model):
+    trackTypeId = models.CharField(max_length=30, blank=False, primary_key=True)
+    name = models.CharField(max_length=255, blank=True, null=True, default='')
+    description = models.CharField(max_length=255, blank=True, null=True, default='')
+
+
+class FeatureTrack(models.Model):
+    # acc
+    uniprot_entry = models.ForeignKey(UniprotEntry, related_name='tracks', on_delete=models.CASCADE)
+    # visualization_type
+    track_type = models.ForeignKey(TrackType, related_name='tracks', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, blank=True, null=True, default='')
+    reference = models.CharField(max_length=255, blank=True, null=True, default='')
+    fav_icon = models.CharField(max_length=255, blank=True, null=True, default='')
+
+
+class TrackData(models.Model):
+    # "mutationType": "SNP",
+    # "mutationEffect": "start_lost",
+    # "begin": 1,
+    # "end": 1,
+    # "wildtype": "M",
+    # "variation": "L",
+    # "numberOfViruses": 2,
+    # "reportedProtChange": "QHD43415.1:p.1M>L",
+    # "genomicPosition": 266,
+    # "originalGenomic": "A",
+    # "newGenomic": ">T",
+    # "evidenceLevel": "III",
+    # "xrefs": []
+
+    f_track = models.ForeignKey(FeatureTrack, related_name='data', on_delete=models.CASCADE)
+    mutationType = models.CharField(max_length=255, blank=True, null=True, default='')
+    mutationEffect = models.CharField(max_length=255, blank=True, null=True, default='')
+    begin = models.IntegerField()
+    end = models.IntegerField()
+    wildtype = models.CharField(max_length=255, blank=True, null=True, default='')
+    variation = models.CharField(max_length=255, blank=True, null=True, default='')
+    numberOfViruses = models.IntegerField()
+    reportedProtChange = models.CharField(max_length=255, blank=True, null=True, default='')
+    genomicPosition = models.IntegerField()
+    originalGenomic = models.CharField(max_length=255, blank=True, null=True, default='')
+    newGenomic = models.CharField(max_length=255, blank=True, null=True, default='')
+    evidenceLevel = models.CharField(max_length=255, blank=True, null=True, default='')

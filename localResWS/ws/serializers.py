@@ -51,9 +51,7 @@ class DataFileSerializer(serializers.ModelSerializer):
     data = DataFileNestedSerializer(many=True, read_only=True)
     class Meta:
         model = models.DataFile
-        # fields = ['unique_id', 'filename', 'entry', 'path', 'data', 'fileType']
         fields = ['unique_id', 'filename', 'entry', 'data', 'fileType']
-        exclude = ['path']
 
 
 class DataSetSerializer(serializers.ModelSerializer):
@@ -61,3 +59,31 @@ class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.DataSet
         fields = ['file', 'features']
+
+
+class UniprotEntrySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.UniprotEntry
+        fields = '__all__'
+
+
+class TrackTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.TrackType
+        fields = '__all__'
+
+
+class FeatureDataSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.TrackData
+        fields = '__all__'
+
+class FeatureTrackSerializer(serializers.ModelSerializer):
+    data = FeatureDataSerializer(many=True)
+
+    class Meta:
+        model = models.FeatureTrack
+        fields = '__all__'

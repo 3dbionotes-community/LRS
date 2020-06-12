@@ -1,15 +1,16 @@
+import json
+import logging
 import os
 import re
-
 from subprocess import check_output
 
 from django.core.exceptions import ValidationError
 
 from localResWS.ws import models
-from localResWS.ws.dataPaths import THORN_DATA_DIR, LOCAL_DATA_DIR, EMDB_BASEDIR, EMDB_DATA_DIR, MODIFIED_PDBS_ANN_DIR, \
-  MODEL_AND_LIGAND_DIR
+from localResWS.ws.dataPaths import (EMDB_BASEDIR, EMDB_DATA_DIR,
+                                     LOCAL_DATA_DIR, MODEL_AND_LIGAND_DIR,
+                                     MODIFIED_PDBS_ANN_DIR, THORN_DATA_DIR)
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -215,3 +216,105 @@ class PdbEntryAnnFromMapsUtils(object):
                 if fname== targetFname:
                     return os.path.join(rootDir, dirName, fname)
       return None
+
+
+#  Update data
+def _update_uniprot_entry(accession, name=None, description=None):
+    try:
+        # update or create UniprotEntry
+        obj, created = models.UniprotEntry.objects.update_or_create(
+            accession=accession,
+            defaults={
+                'name': name if name else '',
+                'description': description if description else '',})
+        if created:
+            logger.debug('Created new entry: %s', obj)
+    except() as exc:
+        logger.exception(exc)
+    return obj
+
+def _update_track_type(trackTypeId, name=None, description=None):
+    try:
+        # update or create TrackType
+        obj, created = models.TrackType.objects.update_or_create(
+            trackTypeId=trackTypeId,
+            defaults={
+                'name': name if name else trackTypeId.title(),
+                'description': description if description else '',})
+        if created:
+            logger.debug('Created new entry: %s', obj)
+    except() as exc:
+        logger.exception(exc)
+    return obj
+
+def read_feature_tracks(path, track_name = None):
+    """
+    Read FeatureTracks
+    """
+    logger.debug("Updating Features from : %s", path)
+    # data must be in <path>/<ACC>_annotations.json files
+    objs = []
+    try:
+        data_files = [x for x in os.listdir(path) if x.endswith("_annotations.json")]
+        for file_name in data_files:
+            logger.debug('Reading JSON data from %s', file_name)
+            with open(os.path.join(path, file_name)) as json_file:
+                data = json.load(json_file)
+                for track in data:
+                    t_name = track['track_name']
+                    if t_name == track_name:
+                        accession = track["acc"]
+                        uniprot_entry = _update_uniprot_entry(accession=accession)
+
+                        visualization_type = track["visualization_type"] if "visualization_type" in track else 'basic'
+                        track_type = _update_track_type(trackTypeId=visualization_type)
+
+                        feature_track = _update_feature_track(uniprot_entry, track_type, track)
+                        objs.append(feature_track)
+    except() as exc:
+        logger.exception(exc)
+    return objs
+
+def _update_feature_track(uniprot_entry, track_type, track):
+    """
+    Update FeatureTrack
+    """
+    objs = []
+    track_name = track['track_name']
+    logger.debug('Updating Feature: %s %s %s', uniprot_entry, track_type, track_name)
+    print(uniprot_entry, track_type, track_name)
+    try:
+        # update or create FeatureTrack        
+        obj, created = models.FeatureTrack.objects.update_or_create(
+            uniprot_entry=uniprot_entry,
+            name=track_name,
+            track_type = track_type,
+            defaults={
+                'reference': track["reference"] if "reference" in track else '',
+                'fav_icon': track["fav_icon"] if "fav_icon" in track else ''})
+        if created:
+            logger.debug('Created new entry: %s', obj)
+            objs.append(obj)
+
+        # for elem in track['data']:
+        #     # "mutationType": "SNP",
+        #     # "mutationEffect": "start_lost",
+        #     # "begin": 1,
+        #     # "end": 1,
+        #     # "wildtype": "M",
+        #     # "variation": "L",
+        #     # "numberOfViruses": 2,
+        #     # "reportedProtChange": "QHD43415.1:p.1M>L",
+        #     # "genomicPosition": 266,
+        #     # "originalGenomic": "A",
+        #     # "newGenomic": ">T",
+        #     # "evidenceLevel": "III",
+        #     # "xrefs": [
+                
+        #     # update or create TrackData
+        #     pass
+
+    except() as exc:
+        logger.exception(exc)
+    return objs
+
