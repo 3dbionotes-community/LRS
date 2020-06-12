@@ -9,7 +9,7 @@ webServicePdbs/
 __pycache__/
 *.py[cod]
 *$py.class
-migrations/
+# migrations/
 # C extensions
 *.so
 
