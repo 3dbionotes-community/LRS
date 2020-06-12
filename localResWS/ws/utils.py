@@ -218,7 +218,7 @@ class PdbEntryAnnFromMapsUtils(object):
       return None
 
 
-#  Update data
+#  ######################################################################
 def _update_uniprot_entry(accession, name=None, description=None):
     try:
         # update or create UniprotEntry
@@ -290,6 +290,7 @@ def _update_feature_track(uniprot_entry, track_type, track):
             name=track_name,
             track_type=track_type,
             defaults={
+                'sequence': track["sequence"] if "sequence" in track else '',
                 'reference': track["reference"] if "reference" in track else '',
                 'fav_icon': track["fav_icon"] if "fav_icon" in track else ''})
         if created:

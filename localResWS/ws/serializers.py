@@ -125,6 +125,9 @@ class TrackDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.FeatureTrack
-        fields = ['accession', 'track_name', 'reference', 'fav_icon',
-        'features'
+        fields = [
+            'accession', 
+            'sequence',
+            'track_name', 'reference', 'fav_icon',
+            'features'
         ]

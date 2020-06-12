@@ -70,6 +70,7 @@ class FeatureTrack(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, default='')
     reference = models.CharField(max_length=255, blank=True, null=True, default='')
     fav_icon = models.CharField(max_length=255, blank=True, null=True, default='')
+    sequence = models.TextField(blank=True, null=True, default='')
 
 
 class TrackData(models.Model):
