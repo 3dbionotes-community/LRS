@@ -509,10 +509,14 @@ class TrackDetailView(generics.RetrieveAPIView):
     queryset = models.FeatureTrack.objects.all()
     serializer_class = serializers.TrackDetailSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    filterset_fields = ['mutationType', 'sourceType', 'mutationEffect']
+    search_fields = ['mutationType']
+    ordering_fields = ['mutationType', 'mutationEffect', 'sourceType']
+    ordering = ['mutationType']
     lookup_url_kwarg = 'name'
     multiple_lookup_fields = ['uniprot_entry', 'name']
     
-
     def get_object(self):
         queryset = self.get_queryset()
         filter = {}

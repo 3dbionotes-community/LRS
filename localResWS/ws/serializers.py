@@ -81,8 +81,22 @@ class FeatureDataSerializer(serializers.ModelSerializer):
         model = models.TrackData
         fields = '__all__'
 
+
+class XrefSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        return obj.featureId
+
+    class Meta:
+        model = models.Xref
+        fields = ['id', 'name', 'url']
+
+
 class FeatureDataDetailSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField('get_type')
+    xrefs = XrefSerializer(many=True)
+
     def get_type(self, obj):
         return obj.f_track.track_type.name.upper()
 
@@ -98,20 +112,19 @@ class FeatureDataDetailSerializer(serializers.ModelSerializer):
             'wildType', 'variation',
             'numberOfViruses',
             'reportedProtChange', 'genomicPosition', 'originalGenomic', 'newGenomic',
-            'evidenceLevel']
+            'evidenceLevel',
+            'xrefs']
 
 class FeatureTrackSerializer(serializers.ModelSerializer):
-    # acc <-> uniprot_entry = models.ForeignKey(UniprotEntry, related_name='tracks', on_delete=models.CASCADE)
-    # visualization_type <-> track_type
 
     class Meta:
         model = models.FeatureTrack
         fields = '__all__'
 
+
 class TrackDetailSerializer(serializers.ModelSerializer):
     track_name = serializers.SerializerMethodField('get_track_name')
     accession = serializers.SerializerMethodField('get_acc')
-    # visualization_type = serializers.SerializerMethodField('get_visualization_type')
     features = FeatureDataDetailSerializer(many=True)
 
     def get_track_name(self, obj):

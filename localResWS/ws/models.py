@@ -89,3 +89,9 @@ class TrackData(models.Model):
     originalGenomic = models.CharField(max_length=255, blank=True, null=True, default='')
     newGenomic = models.CharField(max_length=255, blank=True, null=True, default='')
     evidenceLevel = models.CharField(max_length=255, blank=True, null=True, default='')
+
+class Xref(models.Model):
+    feature = models.ForeignKey(TrackData, related_name='xrefs', on_delete=models.CASCADE)
+    featureId = models.CharField(max_length=30, blank=True, null=True, default='')
+    name = models.CharField(max_length=255, blank=True, null=True, default='')
+    url = models.CharField(max_length=255, blank=True, null=True, default='')
