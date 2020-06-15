@@ -36,6 +36,8 @@ urlpatterns = [
     re_path(r'^files/pdbAndLigand/list/(?P<experiment_name>(Diamond_mainProtease|covid19_COSS))/(?P<pdb_id>(\d\w{3}|any))?/'
             r'?(?P<compound_id>\w{3,30})?/?(?P<pocket_id>\w{1,24})?/?$', views.ListPdbAndLigandView.as_view()),
 
-    re_path('^featureTracks/(?P<acc>[^/.]+)/(?P<name>[^/.]+)/$', views.FeatureTrackDetailView.as_view()),
+    # /features/P0DTC1/Genomic_Variants_CNCB/
     re_path('^features/(?P<uniprot_entry>[^/.]+)/(?P<name>[^/.]+)/$', views.TrackDetailView.as_view()),
+    # /features/variants/Genomic_Variants_CNCB/P0DTC1/
+    re_path('^features/variants/(?P<name>[^/.]+)/(?P<uniprot_entry>[^/.]+)/$', views.TrackDetailView.as_view()),
 ]
