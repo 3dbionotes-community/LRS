@@ -339,3 +339,19 @@ def _update_feature_track(uniprot_entry, track_type, track):
         logger.exception(exc)
     return objs
 
+def remove_tracks_by_type(track_type):
+    """
+      Remove FeatureTracks by type
+    """
+    logger.debug("Removing FeatureTracks by: %s", track_type)
+    print("Removing FeatureTracks by: ", track_type)
+    objs = []
+    try:
+        tracks = models.FeatureTrack.objects.filter(track_type=track_type)
+        for track in tracks:
+            logger.debug("Deleting : %s", track.id)
+            print("RDeleting : ", track.id)
+            track.delete()
+    except() as exc:
+        logger.exception(exc)
+    return objs
