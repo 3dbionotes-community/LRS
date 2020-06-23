@@ -264,9 +264,14 @@ def read_feature_tracks(path, track_name = None):
                     t_name = track['track_name']
                     if t_name == track_name:
                         accession = track["acc"]
+                        # check sequence is not empty
+                        if track["sequence"] == "":
+                          raise ValueError('Sequence field can´t be empty.', accession, track["sequence"]) 
                         uniprot_entry = _update_uniprot_entry(accession=accession)
 
                         visualization_type = track["visualization_type"] if "visualization_type" in track else 'basic'
+                        if visualization_type.upper() == "VARIANTS":
+                          raise ValueError('Wrong visualization_type value. Must be VARIANT, not VARIANTS', visualization_type) 
                         track_type = _update_track_type(trackTypeId=visualization_type)
 
                         feature_track = _update_feature_track(uniprot_entry, track_type, track)
