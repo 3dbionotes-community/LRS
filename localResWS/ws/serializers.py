@@ -98,7 +98,9 @@ class FeatureDataDetailSerializer(serializers.ModelSerializer):
     xrefs = XrefSerializer(many=True)
 
     def get_type(self, obj):
-        return obj.f_track.track_type.name.upper()
+        # TODO revert this hack, once JSON data are fixed upstream
+        # return obj.f_track.track_type.name.upper()
+        return obj.f_track.track_type.name.upper()[:-1]
 
     class Meta:
         model = models.TrackData
