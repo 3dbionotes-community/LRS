@@ -34,7 +34,8 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 
 # Setup Django App
+ENV PATH $PATH:/home/bioinfo/.local/bin
 RUN mkdir -p /home/${USER_NAME}/lrs/app
-COPY . /home/${USER_NAME}/lrs/app
+COPY requirements.txt /home/${USER_NAME}/lrs/app
 WORKDIR /home/${USER_NAME}/lrs/app
 RUN pip install -r requirements.txt
