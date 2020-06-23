@@ -307,9 +307,8 @@ def _update_feature_track(uniprot_entry, track_type, track):
                 mutationEffect=elem["mutationEffect"] if "mutationEffect" in elem else '',
                 defaults={
                     'sourceType': elem["sourceType"] if "sourceType" in elem else 'large_scale_study',
-                    'alternativeSequence': elem["alternativeSequence"] if "alternativeSequence" in elem else '',
+                    'alternativeSequence': elem["variation"] if "variation" in elem else '',
                     'wildType': elem["wildtype"] if "wildtype" in elem else '',
-                    'variation': elem["variation"] if "variation" in elem else '',
                     'numberOfViruses': elem["numberOfViruses"] if "numberOfViruses" in elem else 0,
                     'reportedProtChange': elem["reportedProtChange"] if "reportedProtChange" in elem else '',
                     'genomicPosition': elem["genomicPosition"] if "genomicPosition" in elem else 0,

@@ -82,7 +82,6 @@ class TrackData(models.Model):
     begin = models.IntegerField()
     end = models.IntegerField()
     wildType = models.CharField(max_length=255, blank=True, null=True, default='')
-    variation = models.CharField(max_length=255, blank=True, null=True, default='')
     numberOfViruses = models.IntegerField()
     reportedProtChange = models.CharField(max_length=255, blank=True, null=True, default='')
     genomicPosition = models.IntegerField()
