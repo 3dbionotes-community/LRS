@@ -303,15 +303,15 @@ class ListComputationalModelsView(APIView, ListModelsAbstract):
 
 class DownloadComputationalModelsView(APIView, ListModelsAbstract):
     
-    def get(self, request, filename):
+    def get(self, request, model_type, model_name):
         """
-        downloads a generic file given its <filename>
+        Downloads a generic file given its <model_type>/<model_name>
         """
         ext = ".pdb"
         responseData=[]
-        for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, "AlphaFold")):
-            if fname == filename+ext:
-                fullName= os.path.join(COMPUT_MODELS_DIR, "AlphaFold", fname)
+        for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, model_type)):
+            if fname == model_name+ext:
+                fullName= os.path.join(COMPUT_MODELS_DIR, model_type, fname)
                 logger.debug("Trying to download %s"%fullName)
                 with open(fullName, "rb") as fileObj:
                     response = HttpResponse(
@@ -321,8 +321,8 @@ class DownloadComputationalModelsView(APIView, ListModelsAbstract):
                     return response
 
         if len(responseData) == 0:
-            logger.debug("File not found %s", filename)
-            return Response("File not found :" + filename, status=status.HTTP_404_NOT_FOUND)
+            logger.debug("File not found %s", model_name)
+            return Response("File not found :" + model_name, status=status.HTTP_404_NOT_FOUND)
         return Response(responseData)
 
 

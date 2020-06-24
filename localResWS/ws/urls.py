@@ -39,5 +39,5 @@ urlpatterns = [
     # /features/variants/Genomic_Variants_CNCB/P0DTC1/
     re_path('^features/variants/(?P<name>[^/.]+)/(?P<uniprot_entry>[^/.]+)/$', views.TrackDetailView.as_view()),
 
-    re_path(r'^files/computModels/(?P<model_type>(SWISS-MODEL|BSM-Arc|AlphaFold))/(?P<model_name>\w{3,20})/$', views.DownloadComputationalModelsView.as_view()),
+    re_path(r'^files/computModels/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadComputationalModelsView.as_view()),
 ]
