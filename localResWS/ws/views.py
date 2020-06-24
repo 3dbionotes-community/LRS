@@ -313,10 +313,11 @@ class DownloadComputationalModelsView(APIView, ListModelsAbstract):
             if fname == model_name+ext:
                 fullName= os.path.join(COMPUT_MODELS_DIR, model_type, fname)
                 logger.debug("Trying to download %s"%fullName)
-                with open(fullName, "rb") as fileObj:
+                # assuming *.pdb file is text
+                with open(fullName, "r") as fileObj:
                     response = HttpResponse(
                         FileWrapper(fileObj),
-                        content_type='application/x-gzip')
+                        content_type='text/plain')
                     response['Content-Disposition'] = 'attachment; filename="%s"' % fname
                     return response
 
