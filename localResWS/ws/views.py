@@ -73,6 +73,12 @@ class DataFileViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DataFileSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    search_fields = ['unique_id', 'filename']
+    ordering_fields = ['unique_id', 'filename','path' , 'fileType', 'method']
+    ordering = ['path', 'filename']
+
+
 class DataSetViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
@@ -293,6 +299,30 @@ class ListComputationalModelsView(APIView, ListModelsAbstract):
         if len(responseData) == 0:
             logger.debug("Not found %s", uniprot_id + "/" + model_type)
             return not_found_resp(uniprot_id + "/" + model_type)
+        return Response(responseData)
+
+class DownloadComputationalModelsView(APIView, ListModelsAbstract):
+    
+    def get(self, request, filename):
+        """
+        downloads a generic file given its <filename>
+        """
+        ext = ".pdb"
+        responseData=[]
+        for fname in os.listdir(os.path.join(COMPUT_MODELS_DIR, "AlphaFold")):
+            if fname == filename+ext:
+                fullName= os.path.join(COMPUT_MODELS_DIR, "AlphaFold", fname)
+                logger.debug("Trying to download %s"%fullName)
+                with open(fullName, "rb") as fileObj:
+                    response = HttpResponse(
+                        FileWrapper(fileObj),
+                        content_type='application/x-gzip')
+                    response['Content-Disposition'] = 'attachment; filename="%s"' % fname
+                    return response
+
+        if len(responseData) == 0:
+            logger.debug("File not found %s", filename)
+            return Response("File not found :" + filename, status=status.HTTP_404_NOT_FOUND)
         return Response(responseData)
 
 
