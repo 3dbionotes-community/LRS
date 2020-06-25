@@ -174,8 +174,8 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': '0.2.0',
     # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'DEFAULT_PAGINATION_CLASS': 'localResWS.pagination.StandardResultsSetPagination',
-    'PAGE_SIZE': 100,
+    # 'DEFAULT_PAGINATION_CLASS': 'localResWS.pagination.StandardResultsSetPagination',
+    # 'PAGE_SIZE': 100,
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer',],
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }

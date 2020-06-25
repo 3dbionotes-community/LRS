@@ -332,16 +332,15 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
     """
 
 
-    def get(self, request, experiment_name, pdb_id=None, compound_id=None, pocket_id=None, format=None):
+    def get(self, request, experiment_name, pdb_id=None, compound_id=None, pocket_id=None, pose_id=None, format=None):
         """
         Provide downloading links for modified pdbs
         """
-        # print(uniprot_id, prot_name, model_name)
         responseData = []
-        if pocket_id is not None and pdb_id!="any": #Fast access
+        if pocket_id is not None and pdb_id!="any" and pose_id is not None: #Fast access
             try:
                 if experiment_name=="covid19_COSS":
-                    filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
+                    filename = pdb_id+"_"+compound_id+"_"+pocket_id+"_"+pose_id+".pdb"
                     fileRecords = models.DataFile.objects.filter(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[3], filename__iexact=filename,
                                                          fileType__iexact=FILE_TYPES[3], method=experiment_name)
                     responseData = {}
@@ -350,6 +349,7 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
                         responseData["PDB_ID"] = pdb_id
                         responseData["compoundCode"] = compound_id
                         responseData["Pocket"]=pocket_id
+                        responseData["Pose"]=pose_id
                         responseData["LibraryName"]="ZINC"
                     if len(responseData) >0:
                         return Response( [responseData] )
@@ -362,6 +362,10 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
             filters = {"PDB_ID": pdb_id.upper()}
         if compound_id is not None:
             filters.update({"compoundCode": compound_id})
+        if pocket_id is not None:
+            filters.update({"Pocket": pocket_id})
+        if pose_id is not None:
+            filters.update({"Pose": pose_id})
         print("Filters:", filters)
         for experimentName in os.listdir(MODEL_AND_LIGAND_DIR):
             if experimentName == experiment_name:
@@ -383,10 +387,10 @@ class DownloadModelAndLigand(APIView, ListModelsAbstract):
     """
     """
 
-    def get(self, request, experiment_name, pdb_id, compound_id, pocket_id, format=None):
+    def get(self, request, experiment_name, pdb_id, compound_id, pocket_id, pose_id="1", format=None):
         pdb_id= pdb_id.upper()
         if experiment_name=="covid19_COSS":
-            filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
+            filename = pdb_id+"_"+compound_id+"_"+pocket_id+"_"+pose_id+".pdb"
             fullName= os.path.join( MODEL_AND_LIGAND_DIR, experiment_name, pdb_id, filename)
             print("fullName", fullName)
             if os.path.isfile(fullName):
@@ -400,7 +404,7 @@ class DownloadModelAndLigand(APIView, ListModelsAbstract):
 
 #  ######################################################################
 class EntryListUpdateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+#    permission_classes = [permissions.IsAuthenticated]
 
     # def post(self, request, format=None):
     def get(self, request, format=None):

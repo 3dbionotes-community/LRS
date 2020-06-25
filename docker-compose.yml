@@ -15,8 +15,8 @@ services:
       - .:/home/${USER_NAME}/lrs/app
       - ./service/data:/home/${USER_NAME}/lrs/data
     user: ${USER_NAME}
-    # entrypoint: python manage.py runserver 0.0.0.0:8000
-    command: uwsgi --http :8000 --module localResWS.wsgi --master --workers 6 --processes 8 --threads 8
+    entrypoint: python manage.py runserver 0.0.0.0:8000
+    # command: uwsgi --http :8000 --module localResWS.wsgi --master --workers 6 --processes 8 --threads 8
 
 # NGINX proxy
   proxy:
