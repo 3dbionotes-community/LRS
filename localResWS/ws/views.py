@@ -404,7 +404,7 @@ class DownloadModelAndLigand(APIView, ListModelsAbstract):
 
 #  ######################################################################
 class EntryListUpdateView(APIView):
-#    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     # def post(self, request, format=None):
     def get(self, request, format=None):
