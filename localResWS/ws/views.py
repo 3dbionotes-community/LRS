@@ -337,7 +337,7 @@ class DownloadModifiedPdbFile(APIView, ListModelsAbstract):
         model_name = model_name+ext
         try:
             logger.debug("Trying to identify file %s / %s " % (model_type, model_name))
-            fileRecord= models.DataFile.objects.get(fileType=model_type.upper(), filename=model_name)
+            fileRecord= models.DataFile.objects.get(filename=model_name)
         except (ValueError, models.DataFile.DoesNotExist) as exc:
             logger.debug("Error not found: %s / %s" % (model_type, model_name))
             return HttpResponseNotFound()
