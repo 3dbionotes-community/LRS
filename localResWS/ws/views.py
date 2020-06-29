@@ -327,6 +327,33 @@ class DownloadComputationalModelsView(APIView, ListModelsAbstract):
         return Response(responseData)
 
 
+class DownloadModifiedPdbFile(APIView, ListModelsAbstract):
+    
+    def get(self, request, model_type, model_name):
+        """
+        downloads a generic file given its <model_type>/<model_name>
+        """
+        ext = ".pdb"
+        model_name = model_name+ext
+        try:
+            logger.debug("Trying to identify file %s / %s " % (model_type, model_name))
+            fileRecord= models.DataFile.objects.get(fileType=model_type.upper(), filename=model_name)
+        except (ValueError, models.DataFile.DoesNotExist) as exc:
+            logger.debug("Error not found: %s / %s" % (model_type, model_name))
+            return HttpResponseNotFound()
+
+        fullName= os.path.join(fileRecord.path, fileRecord.filename)
+        # logger.debug("Trying to download %s"%fullName)
+        print("Trying to download %s"%fullName)
+        # assuming *.pdb file is text
+        with open(fullName, "r") as fileObj:
+            response = HttpResponse(
+                FileWrapper(fileObj),
+                content_type='text/plain')
+            response['Content-Disposition'] = 'attachment; filename="%s"' % fileRecord.filename
+            return response
+
+
 class ListPdbAndLigandView(APIView, ListModelsAbstract):
     """
     """

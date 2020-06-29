@@ -40,4 +40,5 @@ urlpatterns = [
     re_path('^features/variants/(?P<name>[^/.]+)/(?P<uniprot_entry>[^/.]+)/$', views.TrackDetailView.as_view()),
 
     re_path(r'^files/computModels/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadComputationalModelsView.as_view()),
+    re_path(r'^files/modifiedPdb/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadModifiedPdbFile.as_view()),
 ]
