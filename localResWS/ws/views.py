@@ -313,10 +313,11 @@ class DownloadComputationalModelsView(APIView, ListModelsAbstract):
             if fname == model_name+ext:
                 fullName= os.path.join(COMPUT_MODELS_DIR, model_type, fname)
                 logger.debug("Trying to download %s"%fullName)
-                with open(fullName, "rb") as fileObj:
+                # assuming *.pdb file is text
+                with open(fullName, "r") as fileObj:
                     response = HttpResponse(
                         FileWrapper(fileObj),
-                        content_type='application/x-gzip')
+                        content_type='text/plain')
                     response['Content-Disposition'] = 'attachment; filename="%s"' % fname
                     return response
 
@@ -326,21 +327,47 @@ class DownloadComputationalModelsView(APIView, ListModelsAbstract):
         return Response(responseData)
 
 
+class DownloadModifiedPdbFile(APIView, ListModelsAbstract):
+    
+    def get(self, request, model_type, model_name):
+        """
+        downloads a generic file given its <model_type>/<model_name>
+        """
+        ext = ".pdb"
+        model_name = model_name+ext
+        try:
+            logger.debug("Trying to identify file %s / %s " % (model_type, model_name))
+            fileRecord= models.DataFile.objects.get(fileType=model_type.upper(), filename=model_name)
+        except (ValueError, models.DataFile.DoesNotExist) as exc:
+            logger.debug("Error not found: %s / %s" % (model_type, model_name))
+            return HttpResponseNotFound()
+
+        fullName= os.path.join(fileRecord.path, fileRecord.filename)
+        # logger.debug("Trying to download %s"%fullName)
+        print("Trying to download %s"%fullName)
+        # assuming *.pdb file is text
+        with open(fullName, "r") as fileObj:
+            response = HttpResponse(
+                FileWrapper(fileObj),
+                content_type='text/plain')
+            response['Content-Disposition'] = 'attachment; filename="%s"' % fileRecord.filename
+            return response
+
+
 class ListPdbAndLigandView(APIView, ListModelsAbstract):
     """
     """
 
 
-    def get(self, request, experiment_name, pdb_id=None, compound_id=None, pocket_id=None, format=None):
+    def get(self, request, experiment_name, pdb_id=None, compound_id=None, pocket_id=None, pose_id=None, format=None):
         """
         Provide downloading links for modified pdbs
         """
-        # print(uniprot_id, prot_name, model_name)
         responseData = []
-        if pocket_id is not None and pdb_id!="any": #Fast access
+        if pocket_id is not None and pdb_id!="any" and pose_id is not None: #Fast access
             try:
                 if experiment_name=="covid19_COSS":
-                    filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
+                    filename = pdb_id+"_"+compound_id+"_"+pocket_id+"_"+pose_id+".pdb"
                     fileRecords = models.DataFile.objects.filter(entry__entryId=pdb_id, entry__entryType=ENTRY_TYPES[3], filename__iexact=filename,
                                                          fileType__iexact=FILE_TYPES[3], method=experiment_name)
                     responseData = {}
@@ -349,6 +376,7 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
                         responseData["PDB_ID"] = pdb_id
                         responseData["compoundCode"] = compound_id
                         responseData["Pocket"]=pocket_id
+                        responseData["Pose"]=pose_id
                         responseData["LibraryName"]="ZINC"
                     if len(responseData) >0:
                         return Response( [responseData] )
@@ -361,6 +389,10 @@ class ListPdbAndLigandView(APIView, ListModelsAbstract):
             filters = {"PDB_ID": pdb_id.upper()}
         if compound_id is not None:
             filters.update({"compoundCode": compound_id})
+        if pocket_id is not None:
+            filters.update({"Pocket": pocket_id})
+        if pose_id is not None:
+            filters.update({"Pose": pose_id})
         print("Filters:", filters)
         for experimentName in os.listdir(MODEL_AND_LIGAND_DIR):
             if experimentName == experiment_name:
@@ -382,10 +414,10 @@ class DownloadModelAndLigand(APIView, ListModelsAbstract):
     """
     """
 
-    def get(self, request, experiment_name, pdb_id, compound_id, pocket_id, format=None):
+    def get(self, request, experiment_name, pdb_id, compound_id, pocket_id, pose_id="1", format=None):
         pdb_id= pdb_id.upper()
         if experiment_name=="covid19_COSS":
-            filename = pdb_id+"_"+compound_id+"_"+pocket_id+".pdb"
+            filename = pdb_id+"_"+compound_id+"_"+pocket_id+"_"+pose_id+".pdb"
             fullName= os.path.join( MODEL_AND_LIGAND_DIR, experiment_name, pdb_id, filename)
             print("fullName", fullName)
             if os.path.isfile(fullName):

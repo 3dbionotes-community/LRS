@@ -28,11 +28,11 @@ urlpatterns = [
     re_path(r'^files/modifiedPdb/download/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()), #TODO: make more specific downloads. E.g isolde pdb=?. Do not change after bionotes change
     re_path(r'^files/genericDownload/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()),
     re_path(r'^files/downloadModelAndLigand/(?P<experiment_name>(covid19_COSS))/(?P<pdb_id>(\d\w{3}))/'
-            r'(?P<compound_id>\w{3,30})/(?P<pocket_id>\w{1,24})/$', views.DownloadModelAndLigand.as_view()),
+            r'(?P<compound_id>\w{3,30})/(?P<pocket_id>\w{1,24})/?(?P<pose_id>\w{1,3})?/$', views.DownloadModelAndLigand.as_view()),
 
     re_path(r'^files/computModels/list/(?P<model_type>(SWISS-MODEL|BSM-Arc|AlphaFold))/?(?P<uniprot_id>\w{4,12})/?(?P<prot_name>\w{3,12})?/?(?P<model_name>\w{3,20})?/$', views.ListComputationalModelsView.as_view()),
     re_path(r'^files/pdbAndLigand/list/(?P<experiment_name>(Diamond_mainProtease|covid19_COSS))/(?P<pdb_id>(\d\w{3}|any))?/'
-            r'?(?P<compound_id>\w{3,30})?/?(?P<pocket_id>\w{1,24})?/?$', views.ListPdbAndLigandView.as_view()),
+            r'?(?P<compound_id>\w{3,30})?/?(?P<pocket_id>\w{1,24})?/?(?P<pose_id>\w{1,3})?/$', views.ListPdbAndLigandView.as_view()),
 
     # /features/P0DTC1/Genomic_Variants_CNCB/
     re_path('^features/(?P<uniprot_entry>[^/.]+)/(?P<name>[^/.]+)/$', views.TrackDetailView.as_view()),
@@ -40,4 +40,5 @@ urlpatterns = [
     re_path('^features/variants/(?P<name>[^/.]+)/(?P<uniprot_entry>[^/.]+)/$', views.TrackDetailView.as_view()),
 
     re_path(r'^files/computModels/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadComputationalModelsView.as_view()),
+    re_path(r'^files/modifiedPdb/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadModifiedPdbFile.as_view()),
 ]
