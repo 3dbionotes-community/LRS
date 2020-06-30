@@ -415,20 +415,19 @@ def remove_fileEntry_by_name(filename):
     return objs
 
 
-def removeDuplicateDataFiles(filetype):
+def removeDuplicateDataFiles():
   """
   Remove duplicated DataFiles
   """
-  logger.debug("Searching for duplicated DataFiles with: %s", filetype)
-  print("Searching for duplicated DataFiles with: ", filetype)
+  logger.debug("Searching for duplicated DataFiles: same path + filename")
+  print("Searching for duplicated DataFiles: same path + filename")
   objs = []
   try:
-      for row in models.DataFile.objects.filter(fileType=filetype,):
-        # print("Found : ", row.filename, row.unique_id)
-        if models.DataFile.objects.filter(fileType=filetype, filename=row.filename).count() > 1:
+      for row in models.DataFile.objects.all().reverse():
+        if models.DataFile.objects.filter(path=row.path, filename=row.filename).count() > 1:
             logger.debug("Deleting : %s", row.filename)
             print("Deleting : ", row.filename, row.unique_id)
-            row.delete()
+            # row.delete()
   except() as exc:
       logger.exception(exc)
   return objs
