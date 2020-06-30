@@ -350,8 +350,26 @@ def remove_tracks_by_type(track_type):
         tracks = models.FeatureTrack.objects.filter(track_type=track_type)
         for track in tracks:
             logger.debug("Deleting : %s", track.id)
-            print("RDeleting : ", track.id)
+            print("Deleting : ", track.id)
             track.delete()
+    except() as exc:
+        logger.exception(exc)
+    return objs
+
+
+def remove_fileEntry_by_name(filename):
+    """
+      Remove DataFile by filename
+    """
+    logger.debug("Removing DataFile by : %s", filename)
+    print("Removing DataFile by: ", filename)
+    objs = []
+    try:
+        entry_files = models.DataFile.objects.filter(filename__contains=filename)
+        for entry_file in entry_files:
+            logger.debug("Deleting : %s", entry_file.filename)
+            print("Deleting : ", entry_file.filename)
+            # entry_file.delete()
     except() as exc:
         logger.exception(exc)
     return objs
