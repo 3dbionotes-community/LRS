@@ -427,7 +427,7 @@ def removeDuplicateDataFiles():
         if models.DataFile.objects.filter(path=row.path, filename=row.filename).count() > 1:
             logger.debug("Deleting : %s", row.filename)
             print("Deleting : ", row.filename, row.unique_id)
-            # row.delete()
+            row.delete()
   except() as exc:
       logger.exception(exc)
   return objs
