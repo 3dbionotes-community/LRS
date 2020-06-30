@@ -115,6 +115,46 @@ def updateDB_modelAndLigand(experimentName):
   return entry_list
 
 
+def updateLigandEntryFiles(exp_name):
+  print("updateLigandEntryFiles")
+  if exp_name == "covid19_COSS":
+    entryPath = os.path.join(MODEL_AND_LIGAND_DIR, exp_name)
+    fnames = [ fname for fname in os.listdir(entryPath) if os.path.isdir(os.path.join(entryPath,fname))]
+  else:
+    logger.debug('Error, experimentName %s not understood', exp_name)
+    return []
+  
+  for pdbId in fnames:
+    print("Updating ligands for %s ?"%pdbId)
+    try:
+      # update or create PdbToUniprotMap
+      entry, created = models.Entry.objects.update_or_create(
+        entryId=pdbId,
+        path=entryPath,
+        entryType="modelAndLigand",)
+      if created:
+        logger.debug('Created new entry: %s', entry)
+        print('Created new entry: ', entry)
+
+      # find files inside
+      dirName= os.path.join(entryPath, pdbId)
+      for filename in os.listdir(dirName):
+        if filename.endswith(".pdb"):
+          logger.debug('Creating new dataFile %s record', filename)      
+          # update or create PdbToUniprotMap
+          data_file, created = models.DataFile.objects.update_or_create(
+            entry=entry,
+            filename= filename,
+            path=entryPath,
+            defaults={
+              'method':"",
+              'fileType':FILE_TYPES[3]})
+          if created:
+            logger.debug('Created new data_file: %s', filename)
+            print('Created new data_file: ', filename)
+    except()  as exc:
+      logger.debug(exc)
+
 
 def getEntryAnnFromMapsFiles(entryId):
     logger.debug("Get entry files for %s", entryId)
