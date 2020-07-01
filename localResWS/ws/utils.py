@@ -409,7 +409,26 @@ def remove_fileEntry_by_name(filename):
         for entry_file in entry_files:
             logger.debug("Deleting : %s", entry_file.filename)
             print("Deleting : ", entry_file.filename)
-            # entry_file.delete()
+            entry_file.delete()
     except() as exc:
         logger.exception(exc)
     return objs
+
+
+def removeDuplicateDataFiles():
+  """
+  Remove duplicated DataFiles
+  """
+  logger.debug("Searching for duplicated DataFiles: same path + filename")
+  print("Searching for duplicated DataFiles: same path + filename")
+  objs = []
+  try:
+      for row in models.DataFile.objects.all().reverse():
+        if models.DataFile.objects.filter(path=row.path, filename=row.filename).count() > 1:
+            logger.debug("Deleting : %s", row.filename)
+            print("Deleting : ", row.filename, row.unique_id)
+            row.delete()
+  except() as exc:
+      logger.exception(exc)
+  return objs
+

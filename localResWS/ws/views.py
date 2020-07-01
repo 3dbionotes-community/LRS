@@ -74,9 +74,9 @@ class DataFileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
-    search_fields = ['unique_id', 'filename']
-    ordering_fields = ['unique_id', 'filename','path' , 'fileType', 'method']
-    ordering = ['path', 'filename']
+    search_fields = ['unique_id', 'filename', 'path', 'fileType', 'method']
+    ordering_fields = ['entry__entryId', 'unique_id', 'filename', 'path' , 'fileType', 'method']
+    ordering = ['entry__entryId', 'path', 'filename']
 
 
 class DataSetViewSet(viewsets.ModelViewSet):
