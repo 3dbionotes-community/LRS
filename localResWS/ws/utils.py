@@ -363,16 +363,17 @@ def _update_feature_track(uniprot_entry, track_type, track):
             if created:
                 logger.debug('Created new entry: %s', track_data)
             
-            for elem in elem["xrefs"]:
-              # update or create Xref
-              xref, created = models.Xref.objects.update_or_create(
-                feature=track_data,
-                featureId=elem["id"],
-                name=elem["name"] if "name" in elem else '',
-                defaults={
-                    'url': elem["url"] if "url" in elem else '',})
-            if created:
-                logger.debug('Created new entry: %s', track_data)
+            if "xrefs" in elem:
+              for ref in elem["xrefs"]:
+                # update or create Xref
+                xref, created = models.Xref.objects.update_or_create(
+                  feature=track_data,
+                  featureId=ref["id"],
+                  name=ref["name"] if "name" in ref else '',
+                  defaults={
+                      'url': ref["url"] if "url" in ref else '',})
+              if created:
+                  logger.debug('Created new entry: %s', xref)
 
 
     except() as exc:
