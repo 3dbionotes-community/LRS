@@ -16,13 +16,17 @@ from django_filters import FilterSet, ModelChoiceFilter
 from django_filters import rest_framework as filters
 from localResWS.ws import models, serializers
 from localResWS.ws.dataPaths import (COMPUT_MODELS_DIR, LOCAL_DATA_DIR,
-                                     MODEL_AND_LIGAND_DIR)
+                                     MODEL_AND_LIGAND_DIR,
+                                     EMV_WS_URL,
+                                     EMV_WS_PATH)
 from localResWS.ws.models import ENTRY_TYPES, FILE_TYPES
 from localResWS.ws.utils import (PdbEntryAnnFromMapsUtils,
                                  getEntryAnnFromMapsFiles,
                                  updateDB_annoFromMaps,
                                  updateDB_modelAndLigand,
-                                 updateDB_modifiedPdbs)
+                                 updateDB_modifiedPdbs)                  
+import requests                           
+
 
 logger = logging.getLogger(__name__)
 
@@ -194,9 +198,30 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
                     algoDataDict["algoType"]=algFamily
                     responseData.append(algoDataDict)
 
+
         if len(responseData)==0:
-          logger.debug("Not found %s", pdb_id+"/"+chain_id)
-          return not_found_resp(pdb_id)
+            logger.debug("Not found %s", pdb_id+"/"+chain_id)
+        #   Request EMV WebService to calculate the EMV scores
+        #   This is an asyncronous call for computation. User must query again in the future to get results
+            q_path = EMV_WS_URL +"/"+ EMV_WS_PATH +"/"+ pdb_id +"/"+ chain_id +"/"
+            logger.debug("Requesting EMV WebService to calculate the EMV scores %s", q_path)
+            try:
+                headers = {'accept': 'application/json'}
+                resp = requests.get(q_path, headers=headers, timeout=(2, 5))
+                
+                logger.debug("EMV WS-query: %s", resp.url)
+                logger.debug("WS-response: %s, %s", resp.status_code, resp.json())
+                if resp:
+                    dresp = HttpResponse(
+                        content=resp.content,
+                        status=resp.status_code,
+                        content_type=resp.headers['Content-Type']
+)
+                    return dresp
+            except Exception as exc:
+                logger.exception(exc)
+            
+            return not_found_resp(pdb_id)
 
         return Response(responseData)
 
