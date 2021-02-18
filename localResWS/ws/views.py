@@ -207,10 +207,17 @@ class PdbEntryAllAnnFromMapView(APIView, PdbEntryAnnFromMapsUtils):
             logger.debug("Requesting EMV WebService to calculate the EMV scores %s", q_path)
             try:
                 headers = {'accept': 'application/json'}
-                r = requests.get(q_path, headers=headers, timeout=(2, 5))
+                resp = requests.get(q_path, headers=headers, timeout=(2, 5))
                 
-                logger.debug("EMV WS-query: %s", r.url)
-                logger.debug("WS-response: %s, %s", r.status_code, r.json())
+                logger.debug("EMV WS-query: %s", resp.url)
+                logger.debug("WS-response: %s, %s", resp.status_code, resp.json())
+                if resp:
+                    dresp = HttpResponse(
+                        content=resp.content,
+                        status=resp.status_code,
+                        content_type=resp.headers['Content-Type']
+)
+                    return dresp
             except Exception as exc:
                 logger.exception(exc)
             
