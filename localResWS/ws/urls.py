@@ -23,9 +23,10 @@ urlpatterns = [
     path('update/', views.EntryListUpdateView.as_view(), name='db-update'),
     path('<slug:query_id>/', views.EntryAnnFromMapsView.as_view()),
 
-    re_path(r'^pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/?(?P<modified_model>(pdb-redo|isolde))?/$', views.PdbEntryAllAnnFromMapView.as_view()),    
-    re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde))/(?P<pdb_id>\d\w{3})/$', views.ListModifiedPDBView.as_view()),
-    re_path(r'^files/modifiedPdb/download/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()), #TODO: make more specific downloads. E.g isolde pdb=?. Do not change after bionotes change
+    # EM Validation annotations for 3DBionotes - Protvista 
+    re_path(r'^pdbAnnotFromMap/all/(?P<pdb_id>\d\w{3})/(?P<chain_id>\w{1})/?(?P<modified_model>(pdb-redo|isolde))?/$', views.PdbEntryAllAnnFromMapView.as_view()),
+
+    
     re_path(r'^files/genericDownload/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()),
     re_path(r'^files/downloadModelAndLigand/(?P<experiment_name>(covid19_COSS))/(?P<pdb_id>(\d\w{3}))/'
             r'(?P<compound_id>\w{3,30})/(?P<pocket_id>\w{1,24})/?(?P<pose_id>\w{1,3})?/$', views.DownloadModelAndLigand.as_view()),
@@ -40,5 +41,9 @@ urlpatterns = [
     re_path('^features/variants/(?P<name>[^/.]+)/(?P<uniprot_entry>[^/.]+)/$', views.TrackDetailView.as_view()),
 
     re_path(r'^files/computModels/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadComputationalModelsView.as_view()),
-    re_path(r'^files/modifiedPdb/(?P<model_type>[^/.]+)/(?P<model_name>[^/.]+)/$', views.DownloadModifiedPdbFile.as_view()),
+    
+    # modifiedPdb
+    re_path(r'^files/modifiedPdb/list/(?P<model_type>(pdb-redo|isolde|refmac))/(?P<pdb_id>\d\w{3})/$', views.ListModifiedPDBView.as_view()),
+    re_path(r'^files/modifiedPdb/download/(?P<file_uuid>[0-9a-f-]+)/$', views.DownloadGenericFile.as_view()),
+    re_path(r'^files/modifiedPdb/(?P<model_type>(pdb-redo|isolde|refmac))/(?P<model_name>[^/.]+)/$', views.DownloadModifiedPdbFile.as_view()),
 ]
