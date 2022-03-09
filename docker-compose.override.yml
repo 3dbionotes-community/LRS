@@ -1,0 +1,24 @@
+version: '3'
+# 
+# DEVELOPMENT ONLY SETTINGS
+# Override common settings
+# 
+
+services:
+  # App container for development
+  ws:
+    image: bcu/lrs_ws
+    build:
+      context: ./localResWS
+      args:
+        USER_NAME: ${USER_NAME}
+        USER_PASSWD: ${USER_PASSWD}
+        USER_UID: ${USER_UID}
+        USER_GID: ${USER_UID}
+    ports:
+      - "${APP_EXT_PORT}:8000"
+    volumes:
+      - .:/home/${USER_NAME}/lrs/app
+      - ./service/data:/home/${USER_NAME}/lrs/data
+    user: ${USER_NAME}
+    entrypoint: python manage.py runserver 0.0.0.0:8000
