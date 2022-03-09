@@ -171,7 +171,7 @@ LOGGING = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_VERSION': '0.4.0',
+    'DEFAULT_VERSION': '0.4.1',
     # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'localResWS.pagination.StandardResultsSetPagination',
