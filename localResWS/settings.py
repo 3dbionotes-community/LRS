@@ -140,6 +140,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
+LOGS_PATH = os.path.join(BASE_DIR, 'localResWS', 'logs')
+if not os.path.exists(LOGS_PATH):
+    os.mkdir(LOGS_PATH)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -147,14 +150,14 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'localResWS', 'logs', 'lresWS.log'),
+            'filename': os.path.join(LOGS_PATH, 'lresWS.log'),
             'maxBytes': 1024*1024*50,  # 50MB
             'backupCount': 7,
         },
     },
     'loggers': {
         'django.utils.autoreload': {
-          'level': 'INFO',
+            'level': 'INFO',
         },
         'django': {
             'handlers': ['file'],
@@ -166,7 +169,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        
+
     },
 }
 
@@ -176,7 +179,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'localResWS.pagination.StandardResultsSetPagination',
     # 'PAGE_SIZE': 100,
-    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer',],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer', ],
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
@@ -203,4 +206,3 @@ USE_X_FORWARDED_PORT = True
 # CSRF_COOKIE_SECURE = True
 # CSRF_COOKIE_HTTPONLY = True
 # X_FRAME_OPTIONS = 'DENY'
-
