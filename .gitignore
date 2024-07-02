@@ -85,3 +85,4 @@ env.bak/
 venv.bak/
 
 */logs/*
+.DS_Store
