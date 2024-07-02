@@ -10,9 +10,9 @@ author: [Jose R. Macias](mailto:jr.macias@cnb.csic.es)
 INSTALLATION:
 
 DEV
-- docker-compose up --build
-- docker-compose down
+- docker compose up --build
+- docker compose down
 
 PROD
-- docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-- docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+- docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+- docker compose -f docker-compose.yml -f docker-compose.prod.yml down

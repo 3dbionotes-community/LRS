@@ -1,4 +1,3 @@
-version: '3'
 
 services:
   # App container for development
