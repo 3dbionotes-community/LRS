@@ -151,7 +151,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOGS_PATH, 'lresWS.log'),
-            'maxBytes': 1024*1024*50,  # 50MB
+            'maxBytes': 1024 * 1024 * 50,  # 50MB
             'backupCount': 7,
         },
     },
